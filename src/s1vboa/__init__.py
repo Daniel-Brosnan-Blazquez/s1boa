@@ -9,7 +9,7 @@ module s1vboa
 import os
 
 # Import flask utilities
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_debugtoolbar import DebugToolbarExtension
 import jinja2
 
@@ -22,12 +22,19 @@ def create_app():
     """
     app = vboa.create_app()
 
+    # Register the specific templates folder
     s2vboa_templates_folder = os.path.dirname(__file__) + "/templates"
-
     templates_loader = jinja2.ChoiceLoader([
         jinja2.FileSystemLoader(s2vboa_templates_folder),
         app.jinja_loader
     ])
     app.jinja_loader = templates_loader
+
+    # Register the specific static folder
+    s1vboa_static_folder = os.path.dirname(__file__) + "/static"
+    @app.route('/s1_static_images/<path:filename>')
+    def s1_static(filename):
+        return send_from_directory(s1vboa_static_folder + "/images", filename)
+    # end def
     
     return app
