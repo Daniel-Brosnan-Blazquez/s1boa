@@ -8,7 +8,6 @@ module s1boa
 # Import python utilities
 import os
 import tempfile
-import pdb
 
 # Import xml parser
 from lxml import etree
@@ -74,8 +73,6 @@ def process_file(file_path, engine, query, reception_time):
 
     eboa_ingestion_functions.insert_ingestion_progress(session_progress, general_source_progress, 40)
 
-    #pdb.set_trace()
-    
     # Generate the events containing the planned imaging
     list_of_events = []
     for planned_imaging in xpath_xml("/kml/Document/Folder/Folder/Placemark"):
@@ -89,6 +86,9 @@ def process_file(file_path, engine, query, reception_time):
         # Split geometries crossing the antimeridian
         list_formatted_coordinates_corrected = siboa_ingestion_functions.correct_antimeridian_issue_in_footprint(formatted_coordinates_to_correct)
 
+        # This statement is commented because it is used to calibrate the chops duration of the NPPF
+        # print("{};{};{};{}".format(planned_imaging.xpath("ExtendedData/Data[@name = 'DatatakeId']/value")[0].text, planned_imaging.xpath("ExtendedData/Data[@name = 'Mode']/value")[0].text, planned_imaging.xpath("ExtendedData/Data[@name = 'Swath']/value")[0].text, planned_imaging.xpath("ExtendedData/Data[@name = 'ObservationDuration']/value")[0].text))
+        
         # Generate event
         values = [
                 {"name": "satellite",
