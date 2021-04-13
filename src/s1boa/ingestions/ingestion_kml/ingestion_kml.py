@@ -87,7 +87,7 @@ def process_file(file_path, engine, query, reception_time):
         list_formatted_coordinates_corrected = siboa_ingestion_functions.correct_antimeridian_issue_in_footprint(formatted_coordinates_to_correct)
 
         # This statement is commented because it is used to calibrate the chops duration of the NPPF
-        # print("{};{};{};{}".format(planned_imaging.xpath("ExtendedData/Data[@name = 'DatatakeId']/value")[0].text, planned_imaging.xpath("ExtendedData/Data[@name = 'Mode']/value")[0].text, planned_imaging.xpath("ExtendedData/Data[@name = 'Swath']/value")[0].text, planned_imaging.xpath("ExtendedData/Data[@name = 'ObservationDuration']/value")[0].text))
+        # print("{};{};{};{};{}".format(planned_imaging.xpath("ExtendedData/Data[@name = 'DatatakeId']/value")[0].text, planned_imaging.xpath("ExtendedData/Data[@name = 'Mode']/value")[0].text, planned_imaging.xpath("ExtendedData/Data[@name = 'Swath']/value")[0].text, planned_imaging.xpath("ExtendedData/Data[@name = 'ObservationDuration']/value")[0].text, planned_imaging.xpath("TimeSpan/begin")[0].text))
         
         # Generate event
         values = [
