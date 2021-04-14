@@ -1,9 +1,9 @@
 """
-Ingestion module for the NPPF files in TGZ format of Sentinel-2
+Ingestion module for the NPPF files in TGZ format of Sentinel-1
 
 Written by DEIMOS Space S.L. (dibb)
 
-module eboa
+module s1boa
 """
 # Import python utilities
 import tarfile
@@ -11,7 +11,7 @@ import tempfile
 import os
 
 # Import NPPF ingestion
-from s2boa.ingestions.ingestion_nppf import ingestion_nppf
+from s1boa.ingestions.ingestion_nppf import ingestion_nppf
 
 # Import ingestion_functions.helpers
 import eboa.ingestion.functions as ingestion_functions

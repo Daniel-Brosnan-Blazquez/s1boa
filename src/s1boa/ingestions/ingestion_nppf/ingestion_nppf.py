@@ -123,7 +123,7 @@ playback_means_by_stop={
 }
 
 @debug
-def _generate_imaging_events(xpath_xml, source, list_of_events):
+def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_completeness_events):
     """
     Method to generate the events for the imaging operations
     :param xpath_xml: source of information that was xpath evaluated
@@ -138,9 +138,9 @@ def _generate_imaging_events(xpath_xml, source, list_of_events):
 
     satellite = source["name"][0:3]
 
-    # Imaging operations
+    # Imaging operations (calibrations are skipped for the moment)
     imaging_operations = xpath_xml("/Earth_Explorer_File/Data_Block/List_of_EVRQs/EVRQ[RQ/RQ_Name='MPSARRFB' or RQ/RQ_Name='MPSARRFC' or RQ/RQ_Name='MPSARDT2' or RQ/RQ_Name='MPPASTH1' or RQ/RQ_Name='MPPASTHD']")
-    imaging_operations = xpath_xml("/Earth_Explorer_File/Data_Block/List_of_EVRQs/EVRQ[RQ/RQ_Name='MPSARDT2']")
+    imaging_operations = xpath_xml("/Earth_Explorer_File/Data_Block/List_of_EVRQs/EVRQ[RQ/RQ_Name='MPSARDT2' or RQ/RQ_Name='MPPASTH1' or RQ/RQ_Name='MPPASTHD']")
 
     for imaging_operation in imaging_operations:
 
@@ -150,7 +150,10 @@ def _generate_imaging_events(xpath_xml, source, list_of_events):
         # Request
         imaging_request = imaging_operation.xpath("RQ/RQ_Name")[0].text
         imaging_request_operation = imaging_request_operations[imaging_request]
-        
+
+        # Request id
+        request_id = imaging_operation.xpath("RQ/List_of_RQ_Attributes/RQ_Attribute[RQ_Attribute_Name = 'RQ_ID']/RQ_Attribute_Value")[0].text
+
         # Imaging mode
         ecc = imaging_operation.xpath("RQ/List_of_RQ_Parameters/RQ_Parameter[RQ_Parameter_Name = 'ECCPRNR']/RQ_Parameter_Value")[0].text
         imaging_mode = imaging_modes[ecc]
@@ -162,7 +165,7 @@ def _generate_imaging_events(xpath_xml, source, list_of_events):
         polarisation_code = imaging_operation.xpath("RQ/List_of_RQ_Parameters/RQ_Parameter[RQ_Parameter_Name = 'POLAR']/RQ_Parameter_Value")[0].text
         polarisation = polarisations[polarisation_code]
 
-        # ORBIT SWATH and BAQ metadata not yet understood
+        # ORB_SWTH, BAQXXX, SDI time (WI_TO_FL, IN_TO_FL, I_TO_VAL, W_TO_VAL) metadata not yet understood if needed
         
         # Datatake ID
         datatake_id_code = imaging_operation.xpath("RQ/List_of_RQ_Parameters/RQ_Parameter[RQ_Parameter_Name = 'DT_ID']/RQ_Parameter_Value")[0].text
@@ -171,9 +174,9 @@ def _generate_imaging_events(xpath_xml, source, list_of_events):
 
         # Number of chops
         number_of_chops = imaging_operation.xpath("RQ/List_of_RQ_Parameters/RQ_Parameter[RQ_Parameter_Name = 'N_PG_REP']/RQ_Parameter_Value")[0].text
-
+        
         ########
-        # Obtain timings
+        # Obtain timings, orbit and angle
         ########
         # Imaging start information
         operation_start = imaging_operation.xpath("EVRQ_Header/EVRQ_Time")[0].text.split("=")[1]
@@ -192,387 +195,90 @@ def _generate_imaging_events(xpath_xml, source, list_of_events):
         imaging_stop_datetime = imaging_start_datetime + datetime.timedelta(seconds=duration)
         imaging_stop = imaging_stop_datetime.isoformat()
 
-        # print("{};{};{};{};{};{};{}".format(imaging_start.split(".")[0], datatake_id, ecc, imaging_mode["short_name"], number_of_chops, duration))
-        
-        # # Imaging event
-        # imaging_event = {
-        #     "link_ref": imaging_link_id,
-        #     "gauge": {
-        #         "insertion_type": "INSERT_and_ERASE",
-        #         "name": "PLANNED_IMAGING",
-        #         "system": satellite
-        #     },
-        #     "start": imaging_start,
-        #     "stop": imaging_stop,
-        #     "values": [
-        #         {"name": "start_request",
-        #          "type": "text",
-        #          "value": imaging_start_request},
-        #         {"name": "stop_request",
-        #          "type": "text",
-        #          "value": imaging_stop_request},
-        #         {"name": "start_orbit",
-        #          "type": "double",
-        #          "value": imaging_start_orbit},
-        #         {"name": "start_angle",
-        #          "type": "double",
-        #          "value": imaging_start_angle},
-        #         {"name": "stop_orbit",
-        #          "type": "double",
-        #          "value": imaging_stop_orbit},
-        #         {"name": "stop_angle",
-        #          "type": "double",
-        #          "value": imaging_stop_angle},
-        #         {"name": "satellite",
-        #          "type": "text",
-        #          "value": satellite},
-        #         {"name": "imaging_mode",
-        #          "type": "text",
-        #          "value": imaging_mode}
-        #     ]
-        # }
+        # print("{};{};{};{};{};{}".format(imaging_start.split(".")[0], datatake_id, ecc, imaging_mode["short_name"], number_of_chops, duration))
 
-        # # Insert imaging_event
-        # eboa_ingestion_functions.insert_event_for_ingestion(imaging_event, source, list_of_events)
-
-    # end for
-
-    return
-
-@debug
-def _generate_idle_events(xpath_xml, source, list_of_events):
-    """
-    Method to generate the events for the idle operation of the satellite
-    :param xpath_xml: source of information that was xpath evaluated
-    :type xpath_xml: XPathEvaluator
-    :param source: information of the source
-    :type xpath_xml: dict
-    :param list_of_events: list to store the events to be inserted into the eboa
-    :type list_of_events: list
-    """
-
-    satellite = source["name"][0:3]
-
-    # Idle operations
-    idle_operations = xpath_xml("/Earth_Explorer_File/Data_Block/List_of_EVRQs/EVRQ[RQ/RQ_Name='MPMSIMID' or RQ/RQ_Name='MPMSSBID']")
-
-    for idle_operation in idle_operations:
-        # Idle start information
-        idle_start = idle_operation.xpath("RQ/RQ_Execution_Time")[0].text.split("=")[1]
-        idle_start_orbit = idle_operation.xpath("RQ/RQ_Absolute_orbit")[0].text
-        idle_start_angle = idle_operation.xpath("RQ/RQ_Deg_from_ANX")[0].text
-        idle_start_request = idle_operation.xpath("RQ/RQ_Name")[0].text
-
-        # Idle stop information
-        idle_operation_stop = idle_operation.xpath("following-sibling::EVRQ[RQ/RQ_Name='MPMSSCAL' or RQ/RQ_Name='MPMSDASC' or RQ/RQ_Name='MPMSDCLO' or RQ/RQ_Name='MPMSIVIC' or RQ/RQ_Name='MPMSNOBS' or RQ/RQ_Name='MPMSIRAW' or RQ/RQ_Name='MPMSIDTS' or RQ/RQ_Name='MPMSIDSB'][1]")
-        if len(idle_operation_stop) == 1:
-            idle_stop_orbit = idle_operation_stop[0].xpath("RQ/RQ_Absolute_orbit")[0].text
-            idle_stop_angle = idle_operation_stop[0].xpath("RQ/RQ_Deg_from_ANX")[0].text
-            idle_stop = idle_operation_stop[0].xpath("RQ/RQ_Execution_Time")[0].text.split("=")[1]
-            idle_stop_request = idle_operation_stop[0].xpath("RQ/RQ_Name")[0].text
-            values = [
-                {"name": "start_request",
-                 "type": "text",
-                 "value": idle_start_request},
-                {"name": "stop_request",
-                 "type": "text",
-                 "value": idle_stop_request},
-                {"name": "start_orbit",
-                 "type": "double",
-                 "value": idle_start_orbit},
-                {"name": "start_angle",
-                 "type": "double",
-                 "value": idle_start_angle},
-                {"name": "stop_orbit",
-                 "type": "double",
-                 "value": idle_stop_orbit},
-                {"name": "stop_angle",
-                 "type": "double",
-                 "value": idle_stop_angle},
-                {"name": "satellite",
-                 "type": "text",
-                 "value": satellite}
-            ]
-        else:
-            idle_stop_orbit = None
-            idle_stop_angle = None
-            idle_stop = source["validity_stop"]
-            idle_stop_request = None
-            values = [
-                {"name": "start_request",
-                 "type": "text",
-                 "value": idle_start_request},
-                {"name": "start_orbit",
-                 "type": "double",
-                 "value": idle_start_orbit},
-                {"name": "start_angle",
-                 "type": "double",
-                 "value": idle_start_angle},
-                {"name": "satellite",
-                 "type": "text",
-                 "value": satellite}
-            ]
-        # end if
-
-        # Idle event
-        idle_event = {
-            "link_ref": "idle_" + str(idle_start),
+        ########
+        # Define imaging event
+        ########        
+        # Imaging event
+        imaging_event = {
             "gauge": {
                 "insertion_type": "INSERT_and_ERASE",
-                "name": "PLANNED_IDLE",
+                "name": "PLANNED_IMAGING",
                 "system": satellite
             },
-            "start": idle_start,
-            "stop": idle_stop,
-            "values": values
-        }
-
-        # Insert idle_event
-        eboa_ingestion_functions.insert_event_for_ingestion(idle_event, source, list_of_events)
-
-    # end for
-
-    return
-
-@debug
-def _generate_playback_events(xpath_xml, source, list_of_events):
-    """
-    Method to generate the events for the idle operation of the satellite
-    :param xpath_xml: source of information that was xpath evaluated
-    :type xpath_xml: XPathEvaluator
-    :param source: information of the source
-    :type xpath_xml: dict
-    :param list_of_events: list to store the events to be inserted into the eboa
-    :type list_of_events: list
-
-    Conceptual design of what is expected given the following inputs
-    PLAYBACK MEAN      |------------XBAND------------|
-    PLAYBACK MEAN                           |------------OCP-----------|
-    PLAYBACK TYPES      |--NOM--||SAD|   |NOM||SAD|     |--NOM--||SAD|
-    
-    RESULT:
-    PB MEAN EVENT 1    |------------XBAND------------|
-    PB TY EVS LINKED    |--NOM--||SAD|   |NOM||SAD|
-    PB MEAN EVENT 2                         |------------OCP----------
-    PB TY EVS LINKED                                    |--NOM--||SAD|
-
-    PB MEAN events and PB TY events are linked
-    """
-    
-    satellite = source["name"][0:3]
-
-    # Playback operations
-    playback_operations = xpath_xml("/Earth_Explorer_File/Data_Block/List_of_EVRQs/EVRQ[(RQ/RQ_Name='MPXBSBOP' and boolean(following-sibling::EVRQ[RQ/RQ_Name='MPXBOPSB'])) or ((RQ/RQ_Name='MPG1STRT' or RQ/RQ_Name='MPG2STRT' or RQ/RQ_Name='MPG3STRT') and boolean(following-sibling::EVRQ[RQ/RQ_Name='MPOCPRY2']))]")
-
-    for playback_operation in playback_operations:
-        # Playback start information
-        playback_start = playback_operation.xpath("RQ/RQ_Execution_Time")[0].text.split("=")[1]
-        playback_start_orbit = playback_operation.xpath("RQ/RQ_Absolute_orbit")[0].text
-        playback_start_angle = playback_operation.xpath("RQ/RQ_Deg_from_ANX")[0].text
-        playback_start_request = playback_operation.xpath("RQ/RQ_Name")[0].text
-
-        playback_mean = playback_means[playback_start_request]
-
-        # Playback stop information
-        if playback_mean == "XBAND":
-            playback_operation_stop = playback_operation.xpath("following-sibling::EVRQ[RQ/RQ_Name='MPXBOPSB'][1]")[0]
-        else:
-            playback_operation_stop = playback_operation.xpath("following-sibling::EVRQ[RQ/RQ_Name='MPOCPRY2'][1]")[0]
-        # end if
-        playback_stop_orbit = playback_operation_stop.xpath("RQ/RQ_Absolute_orbit")[0].text
-        playback_stop_angle = playback_operation_stop.xpath("RQ/RQ_Deg_from_ANX")[0].text
-        playback_stop = playback_operation_stop.xpath("RQ/RQ_Execution_Time")[0].text.split("=")[1]
-        playback_stop_request = playback_operation_stop.xpath("RQ/RQ_Name")[0].text
-
-        playback_mean_link_id = "playback_mean_" + playback_stop
-
-        # Playback event
-        playback_event = {
-            "link_ref": playback_mean_link_id,
-            "gauge": {
-                "insertion_type": "INSERT_and_ERASE",
-                "name": "PLANNED_PLAYBACK_MEAN",
-                "system": satellite
-            },
-            "start": playback_start,
-            "stop": playback_stop,
+            "start": imaging_start,
+            "stop": imaging_stop,
             "values": [
-                {"name": "start_request",
-                 "type": "text",
-                 "value": playback_start_request},
-                {"name": "stop_request",
-                 "type": "text",
-                 "value": playback_stop_request},
-                {"name": "start_orbit",
-                 "type": "double",
-                 "value": playback_start_orbit},
-                {"name": "start_angle",
-                 "type": "double",
-                 "value": playback_start_angle},
-                {"name": "stop_orbit",
-                 "type": "double",
-                 "value": playback_stop_orbit},
-                {"name": "stop_angle",
-                 "type": "double",
-                 "value": playback_stop_angle},
                 {"name": "satellite",
                  "type": "text",
                  "value": satellite},
-                {"name": "playback_mean",
+                {"name": "request_id",
                  "type": "text",
-                 "value": playback_mean}
-            ]
-        }
-
-        # Insert playback_event
-        eboa_ingestion_functions.insert_event_for_ingestion(playback_event, source, list_of_events)
-
-    # end for
-
-
-    # Associate the playback types to the playback means
-    playback_type_start_operations = xpath_xml("/Earth_Explorer_File/Data_Block/List_of_EVRQs/EVRQ[(((RQ/RQ_Name='MPMMPNOM' or RQ/RQ_Name='MPMMPREG' or RQ/RQ_Name='MPMMPBRT' or RQ/RQ_Name='MPMMPNRT') and boolean(following-sibling::EVRQ[RQ/RQ_Name='MPMMPSTP'])) or RQ/RQ_Name='MPMMPBHK' or RQ/RQ_Name='MPMMPBSA' or RQ/RQ_Name='MPMMPBHS')  and (boolean(following-sibling::EVRQ[RQ/RQ_Name='MPXBOPSB']) or boolean(following-sibling::EVRQ[RQ/RQ_Name='MPOCPRY2']))]")
-
-    for playback_type_start_operation in playback_type_start_operations:
-
-        # Playback_Type start information
-        playback_type_start = playback_type_start_operation.xpath("RQ/RQ_Execution_Time")[0].text.split("=")[1]
-        playback_type_start_orbit = playback_type_start_operation.xpath("RQ/RQ_Absolute_orbit")[0].text
-        playback_type_start_angle = playback_type_start_operation.xpath("RQ/RQ_Deg_from_ANX")[0].text
-        playback_type_start_request = playback_type_start_operation.xpath("RQ/RQ_Name")[0].text
-
-        playback_type = playback_types[playback_type_start_request]
-
-        if playback_type in ["HKTM", "SAD", "HKTM_SAD"]:
-            playback_type_stop_operation = playback_type_start_operation
-        else:
-            playback_type_stop_operation = playback_type_start_operation.xpath("following-sibling::EVRQ[RQ/RQ_Name='MPMMPSTP'][1]")[0]
-        # end if
-
-        # Playback_Type stop information
-        playback_type_stop = playback_type_stop_operation.xpath("RQ/RQ_Execution_Time")[0].text.split("=")[1]
-        playback_type_stop_orbit = playback_type_stop_operation.xpath("RQ/RQ_Absolute_orbit")[0].text
-        playback_type_stop_angle = playback_type_stop_operation.xpath("RQ/RQ_Deg_from_ANX")[0].text
-        playback_type_stop_request = playback_type_stop_operation.xpath("RQ/RQ_Name")[0].text
-
-        playback_mean = playback_type_start_operation.xpath("following-sibling::EVRQ[RQ/RQ_Name='MPXBOPSB' or RQ/RQ_Name='MPOCPRY2'][1]")
-        if len (playback_mean) > 0:
-            playback_mean_start_request = playback_mean[0].xpath("RQ/RQ_Name")[0].text
-
-            playback_mean = playback_means_by_stop[playback_mean_start_request]
-        else:
-            playback_mean = "N/A"
-        # end if
-
-        playback_mean_stop = playback_type_start_operation.xpath("following-sibling::EVRQ[RQ/RQ_Name='MPXBOPSB' or RQ/RQ_Name='MPOCPRY2'][1]")[0].xpath("RQ/RQ_Execution_Time")[0].text.split("=")[1]
-        playback_mean_link_id = "playback_mean_" + playback_mean_stop
-
-        # Playback_Type event
-        playback_type_event = {
-            "link_ref": "playback_" + playback_type_start,
-            "gauge": {
-                "insertion_type": "INSERT_and_ERASE",
-                "name": "PLANNED_PLAYBACK",
-                "system": satellite
-            },
-            "start": playback_type_start,
-            "stop": playback_type_stop,
-            "links": [
-                {
-                    "link": playback_mean_link_id,
-                    "link_mode": "by_ref",
-                    "name": "PLANNED_PLAYBACK",
-                    "back_ref": "PLANNED_PLAYBACK_MEAN"
-                }
-            ],
-            "values": [
-                {"name": "start_request",
+                 "value": request_id},
+                {"name": "request",
                  "type": "text",
-                 "value": playback_type_start_request},
-                {"name": "stop_request",
+                 "value": imaging_request},
+                {"name": "imaging_operation",
                  "type": "text",
-                 "value": playback_type_stop_request},
+                 "value": imaging_request_operation},
                 {"name": "start_orbit",
                  "type": "double",
-                 "value": playback_type_start_orbit},
+                 "value": imaging_start_orbit},
                 {"name": "start_angle",
                  "type": "double",
-                 "value": playback_type_start_angle},
-                {"name": "stop_orbit",
+                 "value": imaging_start_angle},
+                {"name": "ecc",
+                 "type": "text",
+                 "value": ecc},
+                {"name": "imaging_mode",
+                 "type": "text",
+                 "value": imaging_mode["short_name"]},
+                {"name": "imaging_mode_long_name",
+                 "type": "text",
+                 "value": imaging_mode["long_name"]},
+                {"name": "warmup",
+                 "type": "text",
+                 "value": warmup},
+                {"name": "polarisation",
+                 "type": "text",
+                 "value": polarisation},
+                {"name": "datatake_id",
+                 "type": "text",
+                 "value": datatake_id},
+                {"name": "number_of_chops",
                  "type": "double",
-                 "value": playback_type_stop_orbit},
-                {"name": "stop_angle",
-                 "type": "double",
-                 "value": playback_type_stop_angle},
-                {"name": "satellite",
-                 "type": "text",
-                 "value": satellite},
-                {"name": "playback_mean",
-                 "type": "text",
-                 "value": playback_mean},
-                {"name": "playback_type",
-                 "type": "text",
-                 "value": playback_type}
+                 "value": number_of_chops},
             ]
         }
 
-        parameters = []
-        playback_type_event["values"].append(
-            {"name": "parameters",
-             "type": "object",
-             "values": parameters},
-        )
-        if playback_type == "HKTM_SAD":
-            parameters.append(
-                {"name": "MEM_FRHK",
-                 "type": "double",
-                 "value": playback_type_start_operation.xpath("RQ/List_of_RQ_Parameters/RQ_Parameter[RQ_Parameter_Name = 'MEM_FRHK']/RQ_Parameter_Value")[0].text},
-            )
-            parameters.append(
-                {"name": "MEM_FSAD",
-                 "type": "double",
-                 "value": playback_type_start_operation.xpath("RQ/List_of_RQ_Parameters/RQ_Parameter[RQ_Parameter_Name = 'MEM_FSAD']/RQ_Parameter_Value")[0].text},
-            )
-        # end if
-        if playback_type in ["HKTM", "SAD", "NOMINAL", "REGULAR", "NRT", "RT"]:
-            parameters.append(
-                {"name": "MEM_FREE",
-                 "type": "double",
-                 "value": playback_type_start_operation.xpath("RQ/List_of_RQ_Parameters/RQ_Parameter[RQ_Parameter_Name = 'MEM_FREE']/RQ_Parameter_Value")[0].text},
-            )
-        # end if
-        if playback_type in ["NOMINAL", "REGULAR", "NRT"]:
-            parameters.append(
-                {"name": "SCN_DUP",
-                 "type": "double",
-                 "value": playback_type_stop_operation.xpath("RQ/List_of_RQ_Parameters/RQ_Parameter[RQ_Parameter_Name = 'SCN_DUP']/RQ_Parameter_Value")[0].text},
-            )
-            parameters.append(
-                {"name": "SCN_RWD",
-                 "type": "double",
-                 "value": playback_type_stop_operation.xpath("RQ/List_of_RQ_Parameters/RQ_Parameter[RQ_Parameter_Name = 'SCN_RWD']/RQ_Parameter_Value")[0].text},
-            )
-        # end if
-        if playback_type == "RT":
-            parameters.append(
-                {"name": "SCN_DUP_START",
-                 "type": "double",
-                 "value": playback_type_start_operation.xpath("RQ/List_of_RQ_Parameters/RQ_Parameter[RQ_Parameter_Name = 'SCN_DUP']/RQ_Parameter_Value")[0].text},
-            )
-            parameters.append(
-                {"name": "SCN_DUP_STOP",
-                 "type": "double",
-                 "value": playback_type_stop_operation.xpath("RQ/List_of_RQ_Parameters/RQ_Parameter[RQ_Parameter_Name = 'SCN_DUP']/RQ_Parameter_Value")[0].text},
-            )
-            parameters.append(
-                {"name": "SCN_RWD",
-                 "type": "double",
-                 "value": playback_type_stop_operation.xpath("RQ/List_of_RQ_Parameters/RQ_Parameter[RQ_Parameter_Name = 'SCN_RWD']/RQ_Parameter_Value")[0].text},
-            )
+        ########
+        # Define packet storage
+        ########        
+        # Packet store ids (enabled by ENA_PS_V and ENA_PS_H -
+        # supposed to be always activated, otherwise values will be
+        # empty and not inserted in the event)
+        if imaging_request == "MPSARDT2":
+            h_packet_store_id_node = imaging_operation.xpath("RQ/List_of_RQ_Parameters/RQ_Parameter[RQ_Parameter_Name = 'PS_ID_H']/RQ_Parameter_Value")
+            if len(h_packet_store_id_node) > 0:
+                h_packet_store_id = h_packet_store_id_node[0].text
+                imaging_event["values"].append({
+                    "name": "h_packet_store_id",
+                    "type": "double",
+                    "value": int(h_packet_store_id)})
+            # end if
+            v_packet_store_id_node = imaging_operation.xpath("RQ/List_of_RQ_Parameters/RQ_Parameter[RQ_Parameter_Name = 'PS_ID_V']/RQ_Parameter_Value")
+            if len(v_packet_store_id_node) > 0:
+                v_packet_store_id = v_packet_store_id_node[0].text
+                imaging_event["values"].append({
+                    "name": "v_packet_store_id",
+                    "type": "double",
+                    "value": int(v_packet_store_id)})
+            # end if
         # end if
 
-        # Insert playback_type_event
-        eboa_ingestion_functions.insert_event_for_ingestion(playback_type_event, source, list_of_events)
+        # Insert event
+        eboa_ingestion_functions.insert_event_for_ingestion(imaging_event, source, list_of_events)
 
     # end for
 
@@ -592,6 +298,7 @@ def process_file(file_path, engine, query, reception_time, tgz_filename = None):
     :type reception_time: str
     """
     list_of_events = []
+    list_of_completeness_events = []
     if tgz_filename != None:
         file_name = tgz_filename
     else:
@@ -643,7 +350,7 @@ def process_file(file_path, engine, query, reception_time, tgz_filename = None):
     eboa_ingestion_functions.insert_ingestion_progress(session_progress, general_source_progress, 10)
 
     # Generate imaging events
-    _generate_imaging_events(xpath_xml, source, list_of_events)
+    _generate_imaging_events(xpath_xml, source, list_of_events, list_of_completeness_events)
 
     eboa_ingestion_functions.insert_ingestion_progress(session_progress, general_source_progress, 40)
 
@@ -657,8 +364,8 @@ def process_file(file_path, engine, query, reception_time, tgz_filename = None):
 
     # eboa_ingestion_functions.insert_ingestion_progress(session_progress, general_source_progress, 95)
     
-    # Build the xml
-    data = {"operations": [{
+    # Build the json
+    nppf_operation = {
         "mode": "insert_and_erase",
         "dim_signature": {
             "name": "NPPF_" + satellite,
@@ -667,8 +374,30 @@ def process_file(file_path, engine, query, reception_time, tgz_filename = None):
         },
         "source": source,
         "events": list_of_events
-    }]}
+    }
 
+    nppf_completeness_operation = {
+        "mode": "insert",
+        "dim_signature": {
+            "name": "COMPLETENESS_NPPF_" + satellite,
+            "exec": os.path.basename(__file__),
+            "version": version
+        },
+        "source": {
+            "name": file_name,
+            "reception_time": reception_time,
+            "generation_time": generation_time,
+            "reported_generation_time": reported_generation_time,
+            "validity_start": validity_start,
+            "reported_validity_start": reported_validity_start,
+            "validity_stop": validity_stop,
+            "priority": 10
+        },
+        "events": list_of_completeness_events
+    }
+
+    data = {"operations": [nppf_operation]}
+    
     eboa_ingestion_functions.insert_ingestion_progress(session_progress, general_source_progress, 100)
 
     query.close_session()
