@@ -1,9 +1,9 @@
 """
-Automated tests for the ingestion of the NPPF files
+Automated tests for the ingestion of the KML files
 
 Written by DEIMOS Space S.L. (dibb)
 
-module ingestions
+module s1boa
 """
 # Import python utilities
 import os
@@ -19,7 +19,7 @@ from eboa.engine.query import Query
 # Import ingestion
 import eboa.ingestion.eboa_ingestion as ingestion
 
-class TestEngine(unittest.TestCase):
+class TestKml(unittest.TestCase):
     def setUp(self):
         # Create the engine to manage the data
         self.engine_eboa = Engine()
