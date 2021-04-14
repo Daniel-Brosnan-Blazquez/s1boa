@@ -296,6 +296,8 @@ def process_file(file_path, engine, query, reception_time, tgz_filename = None):
     :type query: Query
     :param reception_time: time of the reception of the file by the triggering
     :type reception_time: str
+    :param tgz_filename: file name of the original TGZ file
+    :type tgz_filename: str
     """
     list_of_events = []
     list_of_completeness_events = []
