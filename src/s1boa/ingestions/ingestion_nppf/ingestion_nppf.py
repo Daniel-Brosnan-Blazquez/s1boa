@@ -11,7 +11,6 @@ import argparse
 from dateutil import parser
 import datetime
 import json
-import pdb
 
 # Import xml parser
 from lxml import etree
@@ -133,8 +132,6 @@ def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_complete
     :param list_of_events: list to store the events to be inserted into the eboa
     :type list_of_events: list
     """
-
-    #pdb.set_trace()
 
     satellite = source["name"][0:3]
 
