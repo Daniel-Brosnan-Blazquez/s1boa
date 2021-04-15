@@ -198,7 +198,50 @@ def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_complete
         # Define imaging event
         ########        
         # Imaging event
+        imaging_event_values = [
+            {"name": "satellite",
+             "type": "text",
+             "value": satellite},
+            {"name": "request_id",
+             "type": "text",
+             "value": request_id},
+            {"name": "request",
+             "type": "text",
+             "value": imaging_request},
+            {"name": "imaging_operation",
+             "type": "text",
+             "value": imaging_request_operation},
+            {"name": "start_orbit",
+             "type": "double",
+             "value": imaging_start_orbit},
+            {"name": "start_angle",
+             "type": "double",
+             "value": imaging_start_angle},
+            {"name": "ecc",
+             "type": "text",
+             "value": ecc},
+            {"name": "imaging_mode",
+             "type": "text",
+             "value": imaging_mode["short_name"]},
+            {"name": "imaging_mode_long_name",
+             "type": "text",
+             "value": imaging_mode["long_name"]},
+            {"name": "warmup",
+             "type": "text",
+             "value": warmup},
+            {"name": "polarisation",
+             "type": "text",
+             "value": polarisation},
+            {"name": "datatake_id",
+             "type": "text",
+             "value": datatake_id},
+            {"name": "number_of_chops",
+             "type": "double",
+             "value": number_of_chops},
+        ]
+        imaging_event_link_ref = "PLANNED_IMAGING_" + imaging_start
         imaging_event = {
+            "link_ref": imaging_event_link_ref,
             "gauge": {
                 "insertion_type": "INSERT_and_ERASE",
                 "name": "PLANNED_IMAGING",
@@ -206,47 +249,7 @@ def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_complete
             },
             "start": imaging_start,
             "stop": imaging_stop,
-            "values": [
-                {"name": "satellite",
-                 "type": "text",
-                 "value": satellite},
-                {"name": "request_id",
-                 "type": "text",
-                 "value": request_id},
-                {"name": "request",
-                 "type": "text",
-                 "value": imaging_request},
-                {"name": "imaging_operation",
-                 "type": "text",
-                 "value": imaging_request_operation},
-                {"name": "start_orbit",
-                 "type": "double",
-                 "value": imaging_start_orbit},
-                {"name": "start_angle",
-                 "type": "double",
-                 "value": imaging_start_angle},
-                {"name": "ecc",
-                 "type": "text",
-                 "value": ecc},
-                {"name": "imaging_mode",
-                 "type": "text",
-                 "value": imaging_mode["short_name"]},
-                {"name": "imaging_mode_long_name",
-                 "type": "text",
-                 "value": imaging_mode["long_name"]},
-                {"name": "warmup",
-                 "type": "text",
-                 "value": warmup},
-                {"name": "polarisation",
-                 "type": "text",
-                 "value": polarisation},
-                {"name": "datatake_id",
-                 "type": "text",
-                 "value": datatake_id},
-                {"name": "number_of_chops",
-                 "type": "double",
-                 "value": number_of_chops},
-            ]
+            "values": imaging_event_values
         }
 
         ########
@@ -259,7 +262,7 @@ def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_complete
             h_packet_store_id_node = imaging_operation.xpath("RQ/List_of_RQ_Parameters/RQ_Parameter[RQ_Parameter_Name = 'PS_ID_H']/RQ_Parameter_Value")
             if len(h_packet_store_id_node) > 0:
                 h_packet_store_id = h_packet_store_id_node[0].text
-                imaging_event["values"].append({
+                imaging_event_values.append({
                     "name": "h_packet_store_id",
                     "type": "double",
                     "value": int(h_packet_store_id)})
@@ -267,7 +270,7 @@ def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_complete
             v_packet_store_id_node = imaging_operation.xpath("RQ/List_of_RQ_Parameters/RQ_Parameter[RQ_Parameter_Name = 'PS_ID_V']/RQ_Parameter_Value")
             if len(v_packet_store_id_node) > 0:
                 v_packet_store_id = v_packet_store_id_node[0].text
-                imaging_event["values"].append({
+                imaging_event_values.append({
                     "name": "v_packet_store_id",
                     "type": "double",
                     "value": int(v_packet_store_id)})
@@ -276,6 +279,149 @@ def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_complete
 
         # Insert event
         eboa_ingestion_functions.insert_event_for_ingestion(imaging_event, source, list_of_events)
+
+        ########
+        # Define completeness events
+        ########
+        # Completeness values
+        completeness_event_values = imaging_event_values + [
+            {"name": "status",
+             "type": "text",
+             "value": "MISSING"}]
+
+        # DHUS product completeness events
+        # L0
+        if imaging_mode["group"] != "WV":
+            completeness_event = {
+                "gauge": {
+                    "insertion_type": "INSERT_and_ERASE_INTERSECTED_EVENTS_with_PRIORITY",
+                    "name": "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L0",
+                    "system": satellite
+                },
+                "links": [{
+                    "link": imaging_event_link_ref,
+                    "link_mode": "by_ref",
+                    "name": "DHUS_PRODUCT_COMPLETENESS",
+                    "back_ref": "PLANNED_IMAGING"
+                }],
+                "start": imaging_start,
+                "stop": imaging_stop,
+                "values": completeness_event_values,
+                "alerts": [{
+                    "message": "The L0 product related to the datatake id {} and corresponding to the planned imaging with mode {} and timings {}_{} over orbit {} has not been published".format(datatake_id, imaging_mode, imaging_start, imaging_stop, int(imaging_start_orbit)),
+                    "generator": os.path.basename(__file__),
+                    "notification_time": (imaging_start_datetime + datetime.timedelta(hours=24)).isoformat(),
+                    "alert_cnf": {
+                        "name": "ALERT-0001: MISSING L0 DHUS PRODUCT",
+                        "severity": "fatal",
+                        "description": "Alert refers to the missing L0 product published in DHUS",
+                        "group": "S1_PLANNING"
+                    }
+                }]
+            }
+            # Insert event
+            eboa_ingestion_functions.insert_event_for_ingestion(completeness_event, source, list_of_completeness_events)
+
+        # end if
+
+        # L1 SLC
+        if imaging_mode["group"] != "EW":
+            completeness_event = {
+                "gauge": {
+                    "insertion_type": "INSERT_and_ERASE_INTERSECTED_EVENTS_with_PRIORITY",
+                    "name": "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L1_SLC",
+                    "system": satellite
+                },
+                "links": [{
+                    "link": imaging_event_link_ref,
+                    "link_mode": "by_ref",
+                    "name": "DHUS_PRODUCT_COMPLETENESS",
+                    "back_ref": "PLANNED_IMAGING"
+                }],
+                "start": imaging_start,
+                "stop": imaging_stop,
+                "values": completeness_event_values,
+                "alerts": [{
+                    "message": "The L1 SLC product related to the datatake id {} and corresponding to the planned imaging with mode {} and timings {}_{} over orbit {} has not been published".format(datatake_id, imaging_mode, imaging_start, imaging_stop, int(imaging_start_orbit)),
+                    "generator": os.path.basename(__file__),
+                    "notification_time": (imaging_start_datetime + datetime.timedelta(hours=24)).isoformat(),
+                    "alert_cnf": {
+                        "name": "ALERT-0002: MISSING L1 SLC DHUS PRODUCT",
+                        "severity": "fatal",
+                        "description": "Alert refers to the missing L1 SLC product published in DHUS",
+                        "group": "S1_PLANNING"
+                    }
+                }]
+            }
+            # Insert event
+            eboa_ingestion_functions.insert_event_for_ingestion(completeness_event, source, list_of_completeness_events)
+        # end if
+
+        # L1 GRD
+        if imaging_mode["group"] != "WV":
+            completeness_event = {
+                "gauge": {
+                    "insertion_type": "INSERT_and_ERASE_INTERSECTED_EVENTS_with_PRIORITY",
+                    "name": "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L1_GRD",
+                    "system": satellite
+                },
+                "links": [{
+                    "link": imaging_event_link_ref,
+                    "link_mode": "by_ref",
+                    "name": "DHUS_PRODUCT_COMPLETENESS",
+                    "back_ref": "PLANNED_IMAGING"
+                }],
+                "start": imaging_start,
+                "stop": imaging_stop,
+                "values": completeness_event_values,
+                "alerts": [{
+                    "message": "The L1 GRD product related to the datatake id {} and corresponding to the planned imaging with mode {} and timings {}_{} over orbit {} has not been published".format(datatake_id, imaging_mode, imaging_start, imaging_stop, int(imaging_start_orbit)),
+                    "generator": os.path.basename(__file__),
+                    "notification_time": (imaging_start_datetime + datetime.timedelta(hours=24)).isoformat(),
+                    "alert_cnf": {
+                        "name": "ALERT-0003: MISSING L1 GRD DHUS PRODUCT",
+                        "severity": "fatal",
+                        "description": "Alert refers to the missing L1 GRD product published in DHUS",
+                        "group": "S1_PLANNING"
+                    }
+                }]
+            }
+            # Insert event
+            eboa_ingestion_functions.insert_event_for_ingestion(completeness_event, source, list_of_completeness_events)
+        # end if
+
+        # L2 OCN
+        if imaging_mode["group"] != "SM":
+            completeness_event = {
+                "gauge": {
+                    "insertion_type": "INSERT_and_ERASE_INTERSECTED_EVENTS_with_PRIORITY",
+                    "name": "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L2_OCN",
+                    "system": satellite
+                },
+                "links": [{
+                    "link": imaging_event_link_ref,
+                    "link_mode": "by_ref",
+                    "name": "DHUS_PRODUCT_COMPLETENESS",
+                    "back_ref": "PLANNED_IMAGING"
+                }],
+                "start": imaging_start,
+                "stop": imaging_stop,
+                "values": completeness_event_values,
+                "alerts": [{
+                    "message": "The L2 OCN product related to the datatake id {} and corresponding to the planned imaging with mode {} and timings {}_{} over orbit {} has not been published".format(datatake_id, imaging_mode, imaging_start, imaging_stop, int(imaging_start_orbit)),
+                    "generator": os.path.basename(__file__),
+                    "notification_time": (imaging_start_datetime + datetime.timedelta(hours=24)).isoformat(),
+                    "alert_cnf": {
+                        "name": "ALERT-0004: MISSING L2 OCN DHUS PRODUCT",
+                        "severity": "fatal",
+                        "description": "Alert refers to the missing L2 OCN product published in DHUS",
+                        "group": "S1_PLANNING"
+                    }
+                }]
+            }
+            # Insert event
+            eboa_ingestion_functions.insert_event_for_ingestion(completeness_event, source, list_of_completeness_events)
+        # end if
 
     # end for
 
@@ -352,16 +498,6 @@ def process_file(file_path, engine, query, reception_time, tgz_filename = None):
     _generate_imaging_events(xpath_xml, source, list_of_events, list_of_completeness_events)
 
     eboa_ingestion_functions.insert_ingestion_progress(session_progress, general_source_progress, 40)
-
-    # # Generate playback events
-    # _generate_playback_events(xpath_xml, source, list_of_events)
-
-    # eboa_ingestion_functions.insert_ingestion_progress(session_progress, general_source_progress, 70)
-
-    # # Generate idle events
-    # _generate_idle_events(xpath_xml, source, list_of_events)
-
-    # eboa_ingestion_functions.insert_ingestion_progress(session_progress, general_source_progress, 95)
     
     # Build the json
     nppf_operation = {
@@ -374,6 +510,8 @@ def process_file(file_path, engine, query, reception_time, tgz_filename = None):
         "source": source,
         "events": list_of_events
     }
+
+    eboa_ingestion_functions.insert_ingestion_progress(session_progress, general_source_progress, 50)
 
     nppf_completeness_operation = {
         "mode": "insert",
@@ -395,7 +533,7 @@ def process_file(file_path, engine, query, reception_time, tgz_filename = None):
         "events": list_of_completeness_events
     }
 
-    data = {"operations": [nppf_operation]}
+    data = {"operations": [nppf_operation, nppf_completeness_operation]}
     
     eboa_ingestion_functions.insert_ingestion_progress(session_progress, general_source_progress, 100)
 
