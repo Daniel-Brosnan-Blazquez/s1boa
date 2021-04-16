@@ -29,6 +29,13 @@ from eboa.engine.query import Query
 
 version = "1.0"
 
+levels = {
+    "RAW": "L0",
+    "SLC": "L1_SLC",
+    "GRD": "L1_GRD",
+    "OCN": "L2_OCN",
+}
+
 def process_file(file_path, engine, query, reception_time):
     """Function to process the file and insert its relevant information
     into the DDBB of the eboa
@@ -90,6 +97,8 @@ def process_file(file_path, engine, query, reception_time):
     reported_generation_time = file_name[25:40]
     reported_validity_start = file_name[42:57]
     reported_validity_stop = file_name[58:73]
+    ingestion_completeness = "true"
+    ingestion_completeness_message = ""
 
     eboa_ingestion_functions.insert_ingestion_progress(session_progress, general_source_progress, 40)
 
@@ -106,6 +115,9 @@ def process_file(file_path, engine, query, reception_time):
         metadata_url = dhus_product.xpath("id")[0].text
         product_url = metadata_url + "/$value"
         geometry = dhus_product.xpath("properties/ContentGeometry/Polygon/outerBoundaryIs/LinearRing/coordinates")[0].text
+        orbit = str(int(name[49:55]))
+        # All these elements are to remove the 0 at the left side
+        datatake_id = hex(int(int(name[56:62], 16).to_bytes(4,'big').hex(),16)).replace("0x", "").upper()
         
         ########
         # Obtain timings
@@ -173,6 +185,14 @@ def process_file(file_path, engine, query, reception_time):
                 {"name": "dhus_product_url",
                  "type": "text",
                  "value": product_url
+                },
+                {"name": "datatake_id",
+                 "type": "text",
+                 "value": datatake_id
+                },
+                {"name": "orbit",
+                 "type": "double",
+                 "value": orbit
                 }]
         }
 
@@ -192,6 +212,55 @@ def process_file(file_path, engine, query, reception_time):
         ########
         # Define dhus product event
         ########
+        # Obtain the planned imaging
+        planned_imagings = query.get_events(gauge_names = {"filter": "PLANNED_IMAGING", "op": "=="},
+                                            gauge_systems = {"filter": satellite, "op": "=="},
+                                            start_filters = [{"date": stop, "op": "<"}],
+                                            stop_filters = [{"date": start, "op": ">"}],
+                                            value_filters = [
+                                                {"name": {"filter": "datatake_id", "op": "=="},
+                                                 "type": "text",
+                                                 "value": {"filter": datatake_id, "op": "=="}},
+                                                {"name": {"filter": "start_orbit", "op": "=="},
+                                                 "type": "double",
+                                                 "value": {"filter": orbit, "op": "=="}}
+                                            ])
+        links_dhus_product = []
+        links_dhus_product_completeness = []
+        alerts = []
+        status = "PUBLISHED"
+        if len(planned_imagings) > 0:
+            for planned_imaging in planned_imagings:
+                links_dhus_product.append({
+                    "link": str(planned_imaging.event_uuid),
+                    "link_mode": "by_uuid",
+                    "name": "DHUS_PRODUCT",
+                    "back_ref": "PLANNED_IMAGING"
+                })
+                links_dhus_product_completeness.append({
+                    "link": str(planned_imaging.event_uuid),
+                    "link_mode": "by_uuid",
+                    "name": "DHUS_PRODUCT_COMPLETENESS",
+                    "back_ref": "PLANNED_IMAGING"
+                })
+            # end for
+        else:
+            status = "UNEXPECTED"
+            alerts.append({
+                "message": "The DHUS product {} could not be linked to any planned imaging".format(name),
+                "generator": os.path.basename(__file__),
+                "notification_time": (datetime.datetime.now()).isoformat(),
+                "alert_cnf": {
+                    "name": "ALERT-0200: NO PLANNED IMAGING FOR A DHUS PRODUCT",
+                    "severity": "fatal",
+                    "description": "Alert refers to the missing planned imaging for the corresponding DHUS product",
+                    "group": "DHUS"
+                }
+            })
+            ingestion_completeness = "false"
+            ingestion_completeness_message = "MISSING_PLANNING"
+        # end if
+
         # Dhus product event
         dhus_product_event = {
             "explicit_reference": name,
@@ -200,16 +269,61 @@ def process_file(file_path, engine, query, reception_time):
                 "name": "DHUS_PRODUCT",
                 "system": satellite
             },
+            "links": links_dhus_product,
+            "alerts": alerts,
             "start": start,
             "stop": stop,
             "values": [
                 {"name": "satellite",
                  "type": "text",
-                 "value": satellite}
+                 "value": satellite},
+                {"name": "datatake_id",
+                 "type": "text",
+                 "value": datatake_id
+                },
+                {"name": "orbit",
+                 "type": "double",
+                 "value": orbit
+                }
             ]
         }
 
         list_of_events.append(dhus_product_event)
+
+        # Dhus product completeness event
+        # Completeness timings
+        completeness_start = (parser.parse(start) - datetime.timedelta(seconds=1)).isoformat()
+        completeness_stop = stop
+        level = levels[name[7:10]]
+        dhus_product_completeness_event = {
+            "explicit_reference": name,
+            "gauge": {
+                "insertion_type": "INSERT_and_ERASE_per_EVENT_with_PRIORITY",
+                "name": "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_" + level,
+                "system": satellite
+            },
+            "links": links_dhus_product_completeness,
+            "start": completeness_start,
+            "stop": completeness_stop,
+            "values": [
+                {"name": "satellite",
+                 "type": "text",
+                 "value": satellite},
+                {"name": "datatake_id",
+                 "type": "text",
+                 "value": datatake_id
+                },
+                {"name": "orbit",
+                 "type": "double",
+                 "value": orbit
+                },
+                {"name": "status",
+                 "type": "text",
+                 "value": status}
+            ]
+        }
+
+        list_of_completeness_events.append(dhus_product_completeness_event)
 
     # end for
     
@@ -227,7 +341,11 @@ def process_file(file_path, engine, query, reception_time):
             "generation_time": reported_generation_time,
             "validity_start": reported_validity_start,
             "validity_stop": reported_validity_stop,
-            "priority": 30
+            "priority": 30,
+            "ingestion_completeness": {
+                "check": ingestion_completeness,
+                "message": ingestion_completeness_message
+            } 
         },
         "explicit_references": list_of_explicit_references,
         "events": list_of_events,

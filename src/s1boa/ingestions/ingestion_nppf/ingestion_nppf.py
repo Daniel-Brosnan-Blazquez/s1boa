@@ -289,6 +289,15 @@ def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_complete
              "type": "text",
              "value": "MISSING"}]
 
+        # Completeness timings
+        start = (imaging_start_datetime + datetime.timedelta(seconds=10)).isoformat()
+        stop = (imaging_stop_datetime - datetime.timedelta(seconds=20)).isoformat()
+
+        if start > stop:
+            start = imaging_start
+            stop = imaging_start
+        # end if
+
         # DHUS product completeness events
         # L0
         if imaging_mode["group"] != "WV":
@@ -304,11 +313,11 @@ def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_complete
                     "name": "DHUS_PRODUCT_COMPLETENESS",
                     "back_ref": "PLANNED_IMAGING"
                 }],
-                "start": imaging_start,
-                "stop": imaging_stop,
+                "start": start,
+                "stop": stop,
                 "values": completeness_event_values,
                 "alerts": [{
-                    "message": "The L0 product related to the datatake id {} and corresponding to the planned imaging with mode {} and timings {}_{} over orbit {} has not been published".format(datatake_id, imaging_mode, imaging_start, imaging_stop, int(imaging_start_orbit)),
+                    "message": "The L0 product related to the datatake id {} and corresponding to the planned imaging with mode {} and timings {}_{} over orbit {} has not been published".format(datatake_id, imaging_mode["long_name"], imaging_start, imaging_stop, int(imaging_start_orbit)),
                     "generator": os.path.basename(__file__),
                     "notification_time": (imaging_start_datetime + datetime.timedelta(hours=24)).isoformat(),
                     "alert_cnf": {
@@ -338,11 +347,11 @@ def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_complete
                     "name": "DHUS_PRODUCT_COMPLETENESS",
                     "back_ref": "PLANNED_IMAGING"
                 }],
-                "start": imaging_start,
-                "stop": imaging_stop,
+                "start": start,
+                "stop": stop,
                 "values": completeness_event_values,
                 "alerts": [{
-                    "message": "The L1 SLC product related to the datatake id {} and corresponding to the planned imaging with mode {} and timings {}_{} over orbit {} has not been published".format(datatake_id, imaging_mode, imaging_start, imaging_stop, int(imaging_start_orbit)),
+                    "message": "The L1 SLC product related to the datatake id {} and corresponding to the planned imaging with mode {} and timings {}_{} over orbit {} has not been published".format(datatake_id, imaging_mode["long_name"], imaging_start, imaging_stop, int(imaging_start_orbit)),
                     "generator": os.path.basename(__file__),
                     "notification_time": (imaging_start_datetime + datetime.timedelta(hours=24)).isoformat(),
                     "alert_cnf": {
@@ -371,11 +380,11 @@ def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_complete
                     "name": "DHUS_PRODUCT_COMPLETENESS",
                     "back_ref": "PLANNED_IMAGING"
                 }],
-                "start": imaging_start,
-                "stop": imaging_stop,
+                "start": start,
+                "stop": stop,
                 "values": completeness_event_values,
                 "alerts": [{
-                    "message": "The L1 GRD product related to the datatake id {} and corresponding to the planned imaging with mode {} and timings {}_{} over orbit {} has not been published".format(datatake_id, imaging_mode, imaging_start, imaging_stop, int(imaging_start_orbit)),
+                    "message": "The L1 GRD product related to the datatake id {} and corresponding to the planned imaging with mode {} and timings {}_{} over orbit {} has not been published".format(datatake_id, imaging_mode["long_name"], imaging_start, imaging_stop, int(imaging_start_orbit)),
                     "generator": os.path.basename(__file__),
                     "notification_time": (imaging_start_datetime + datetime.timedelta(hours=24)).isoformat(),
                     "alert_cnf": {
@@ -404,11 +413,11 @@ def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_complete
                     "name": "DHUS_PRODUCT_COMPLETENESS",
                     "back_ref": "PLANNED_IMAGING"
                 }],
-                "start": imaging_start,
-                "stop": imaging_stop,
+                "start": start,
+                "stop": stop,
                 "values": completeness_event_values,
                 "alerts": [{
-                    "message": "The L2 OCN product related to the datatake id {} and corresponding to the planned imaging with mode {} and timings {}_{} over orbit {} has not been published".format(datatake_id, imaging_mode, imaging_start, imaging_stop, int(imaging_start_orbit)),
+                    "message": "The L2 OCN product related to the datatake id {} and corresponding to the planned imaging with mode {} and timings {}_{} over orbit {} has not been published".format(datatake_id, imaging_mode["long_name"], imaging_start, imaging_stop, int(imaging_start_orbit)),
                     "generator": os.path.basename(__file__),
                     "notification_time": (imaging_start_datetime + datetime.timedelta(hours=24)).isoformat(),
                     "alert_cnf": {
