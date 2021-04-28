@@ -7,3 +7,14 @@
 <!-- Logo is exported with a heigth of 80 pixels -->
 <div style="display:inline"><a href="/s1_static_images/Sentinel1.png"><img style="text-align:center" src="/s1_static_images/Sentinel1_page_logo.png"/></a></div>
 {% endblock %}
+{% block side_panel_plugins %}
+<li>
+  <a href="#"><i class="fa fa-file-text-o fa-fw"></i> S1 reporting<span class="fa arrow"></span></a>
+  <ul class="nav nav-second-level">
+    <li>
+      <a href="/views/dhus-completeness"><i class="fa fa-pie-chart fa-fw"></i> Data availability in DHUS</a>
+    </li>
+  </ul>
+  <!-- /.nav-second-level -->
+</li>
+{% endblock %}

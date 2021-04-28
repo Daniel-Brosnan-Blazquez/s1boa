@@ -1,0 +1,85 @@
+<!-- Summary -->
+<div class="row">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#summary-dhus-completeness">Data availability in DHUS summary <span class="fa fa-angle-double-down"></span></a>
+      </h3>
+    </div>
+    <!-- /.panel-heading -->
+    <div class="panel-body panel-collapse collapse in" id="summary-dhus-completeness">
+      <div class="row">
+        <div class="col-xs-3">
+          <div class="panel panel-primary">
+            <div class="panel-heading" align="center" style="font-size: 20px">Expected acquired radar image duration (m)</div>
+            <div class="panel-body" align="center" style="font-size: 50px; color: steelblue" id="summary-dhus-completeness-expected-radar-image">{{ expected_acquisition_duration }}</div>
+          </div>
+        </div>
+        {% if "L0" in parsed_levels[0] %}
+        <div class="col-xs-3">
+          <div class="panel panel-success">
+            <div class="panel-heading" align="center" style="font-size: 20px">Duration of L0 products available in DHUS (m)</div>
+            <div class="panel-body" align="center" style="font-size: 50px; color: green" id="summary-dhus-completeness-available-duration-l0">{{ (expected_dhus_products_duration["L0"] - missing_dhus_products_duration["L0"])|round(3) }}</div>
+          </div>
+        </div>
+        {% endif %}
+        {% if "L1_SLC" in parsed_levels[0] %}
+        <div class="col-xs-3">
+          <div class="panel panel-success">
+            <div class="panel-heading" align="center" style="font-size: 20px">Duration of L1 SLC products available in DHUS (m)</div>
+            <div class="panel-body" align="center" style="font-size: 50px; color: green" id="summary-dhus-completeness-available-duration-l1-slc">{{ (expected_dhus_products_duration["L1_SLC"] - missing_dhus_products_duration["L1_SLC"])|round(3) }}</div>
+          </div>
+        </div>
+        {% endif %}
+        {% if "L1_GRD" in parsed_levels[0] %}
+        <div class="col-xs-3">
+          <div class="panel panel-success">
+            <div class="panel-heading" align="center" style="font-size: 20px">Duration of L1 GRD products available in DHUS (m)</div>
+            <div class="panel-body" align="center" style="font-size: 50px; color: green" id="summary-dhus-completeness-available-duration-l1-grd">{{ (expected_dhus_products_duration["L1_GRD"] - missing_dhus_products_duration["L1_GRD"])|round(3) }}</div>
+          </div>
+        </div>
+        {% endif %}
+        {% if "L2_OCN" in parsed_levels[0] %}
+        <div class="col-xs-3">
+          <div class="panel panel-success">
+            <div class="panel-heading" align="center" style="font-size: 20px">Duration of L2 OCN products available in DHUS (m)</div>
+            <div class="panel-body" align="center" style="font-size: 50px; color: green" id="summary-dhus-completeness-available-duration-l2-ocn">{{ (expected_dhus_products_duration["L2_OCN"] - missing_dhus_products_duration["L2_OCN"])|round(3) }}</div>
+          </div>
+        </div>
+        {% endif %}
+        {% if "L0" in parsed_levels[0] and missing_dhus_products_duration["L0"] > 0 %}
+        <div class="col-xs-3">
+          <div class="panel panel-danger">
+            <div class="panel-heading" align="center" style="font-size: 20px">Missing duration of L0 in DHUS (m)</div>
+            <div class="panel-body" align="center" style="font-size: 50px; color: darkred" id="summary-dhus-completeness-missing-duration-l0">{{ missing_dhus_products_duration["L0"] }}</div>
+          </div>
+        </div>
+        {% endif %}
+        {% if "L1_SLC" in parsed_levels[0] and missing_dhus_products_duration["L1_SLC"] > 0 %}
+        <div class="col-xs-3">
+          <div class="panel panel-danger">
+            <div class="panel-heading" align="center" style="font-size: 20px">Missing duration of L1 SLC in DHUS (m)</div>
+            <div class="panel-body" align="center" style="font-size: 50px; color: darkred" id="summary-dhus-completeness-missing-duration-l1-slc">{{ missing_dhus_products_duration["L1_SLC"] }}</div>
+          </div>
+        </div>
+        {% endif %}
+        {% if "L1_GRD" in parsed_levels[0] and missing_dhus_products_duration["L1_GRD"] > 0 %}
+        <div class="col-xs-3">
+          <div class="panel panel-danger">
+            <div class="panel-heading" align="center" style="font-size: 20px">Missing duration of L1 GRD in DHUS (m)</div>
+            <div class="panel-body" align="center" style="font-size: 50px; color: darkred" id="summary-dhus-completeness-missing-duration-l1-grd">{{ missing_dhus_products_duration["L1_GRD"] }}</div>
+          </div>
+        </div>
+        {% endif %}
+        {% if "L2_OCN" in parsed_levels[0] and missing_dhus_products_duration["L2_OCN"] > 0 %}
+        <div class="col-xs-3">
+          <div class="panel panel-danger">
+            <div class="panel-heading" align="center" style="font-size: 20px">Missing duration of L2 OCN in DHUS (m)</div>
+            <div class="panel-body" align="center" style="font-size: 50px; color: darkred" id="summary-dhus-completeness-missing-duration-l2-ocn">{{ missing_dhus_products_duration["L2_OCN"] }}</div>
+          </div>
+        </div>
+        {% endif %}
+      </div>        
+    </div>
+  </div>
+</div>
