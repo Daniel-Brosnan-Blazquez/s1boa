@@ -48,6 +48,9 @@ def process_file(file_path, engine, query, reception_time):
     :type query: Query
     :param reception_time: time of the reception of the file by the triggering
     :type reception_time: str
+
+    :return: data with the structure to be inserted into the DDBB
+    :rtype: dict
     """
     list_of_events = []
     list_of_annotations = []
@@ -193,6 +196,10 @@ def process_file(file_path, engine, query, reception_time):
                 {"name": "orbit",
                  "type": "double",
                  "value": orbit
+                 },
+                {"name": "size",
+                 "type": "double",
+                 "value": size
                 }]
         }
 
