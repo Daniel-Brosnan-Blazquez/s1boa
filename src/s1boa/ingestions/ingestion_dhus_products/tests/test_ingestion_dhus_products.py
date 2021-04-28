@@ -35,7 +35,7 @@ class TestOpdhus(unittest.TestCase):
         self.query_eboa.close_session()
 
     def test_insert_opdhus(self):
-        filename = "DEC_OPER_OPDHUS_S1A_AUIP_20210414T091220_V20210317T000000_20210318T000000_2131_0000.xml"
+        filename = "DEC_OPER_OPDHUS_S1A_AUIP_20210419T135405_V20210316T000000_20210319T000000_2161_2150_SHORTENED.xml"
         file_path = os.path.dirname(os.path.abspath(__file__)) + "/inputs/" + filename
 
         exit_status = ingestion.command_process_file("s1boa.ingestions.ingestion_dhus_products.ingestion_dhus_products", file_path, "2018-01-01T00:00:00")
