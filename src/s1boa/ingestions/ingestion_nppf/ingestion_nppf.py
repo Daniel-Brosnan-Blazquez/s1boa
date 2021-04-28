@@ -88,8 +88,8 @@ imaging_request_operations = {
     "MPSARRFB": "BASIC_CALIBRATION",
     "MPSARRFC": "SAR_COMBINED_RFC",
     "MPSARDT2": "NOMINAL",
-    "MPPASTH1": "PASS_THOUGH",
-    "MPPASTHD": "PASS_THOUGH_SAR",
+    "MPPASTH1": "PASS_THROUGH",
+    "MPPASTHD": "PASS_THROUGH_SAR",
 }
 
 polarisations = {
