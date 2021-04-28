@@ -110,7 +110,7 @@ class TestEngine(unittest.TestCase):
             {
                 "name": "imaging_operation",
                 "type": "text",
-                "value": "PASS_THOUGH"
+                "value": "PASS_THROUGH"
             },
             {
                 "name": "start_orbit",
@@ -168,8 +168,8 @@ class TestEngine(unittest.TestCase):
              "type": "text",
              "value": {"filter": "MISSING", "op": "=="}}
         ],
-                                            start_filters = [{"date": "2021-03-17T04:10:33.066685", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-17T04:17:48.873819", "op": "=="}])
+                                            start_filters = [{"date": "2021-03-17T04:10:43.066685", "op": "=="}],
+                                            stop_filters = [{"date": "2021-03-17T04:17:28.873819", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -181,8 +181,8 @@ class TestEngine(unittest.TestCase):
              "type": "text",
              "value": {"filter": "MISSING", "op": "=="}}
         ],
-                                            start_filters = [{"date": "2021-03-17T04:10:33.066685", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-17T04:17:48.873819", "op": "=="}])
+                                            start_filters = [{"date": "2021-03-17T04:10:43.066685", "op": "=="}],
+                                            stop_filters = [{"date": "2021-03-17T04:17:28.873819", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -194,8 +194,8 @@ class TestEngine(unittest.TestCase):
              "type": "text",
              "value": {"filter": "MISSING", "op": "=="}}
         ],
-                                            start_filters = [{"date": "2021-03-17T04:10:33.066685", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-17T04:17:48.873819", "op": "=="}])
+                                            start_filters = [{"date": "2021-03-17T04:10:43.066685", "op": "=="}],
+                                            stop_filters = [{"date": "2021-03-17T04:17:28.873819", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -207,8 +207,8 @@ class TestEngine(unittest.TestCase):
              "type": "text",
              "value": {"filter": "MISSING", "op": "=="}}
         ],
-                                            start_filters = [{"date": "2021-03-17T04:10:33.066685", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-17T04:17:48.873819", "op": "=="}])
+                                            start_filters = [{"date": "2021-03-17T04:10:43.066685", "op": "=="}],
+                                            stop_filters = [{"date": "2021-03-17T04:17:28.873819", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -314,8 +314,8 @@ class TestEngine(unittest.TestCase):
              "type": "text",
              "value": {"filter": "MISSING", "op": "=="}}
         ],
-                                            start_filters = [{"date": "2021-03-16T18:19:42.153551", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-16T18:35:48.853967", "op": "=="}])
+                                            start_filters = [{"date": "2021-03-16T18:19:52.153551", "op": "=="}],
+                                            stop_filters = [{"date": "2021-03-16T18:35:28.853967", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -327,8 +327,8 @@ class TestEngine(unittest.TestCase):
              "type": "text",
              "value": {"filter": "MISSING", "op": "=="}}
         ],
-                                            start_filters = [{"date": "2021-03-16T18:19:42.153551", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-16T18:35:48.853967", "op": "=="}])
+                                            start_filters = [{"date": "2021-03-16T18:19:52.153551", "op": "=="}],
+                                            stop_filters = [{"date": "2021-03-16T18:35:28.853967", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -435,7 +435,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-17T12:31:23.026189", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-17T12:31:48.030734", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-17T12:31:23.026189", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -448,7 +448,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-17T12:31:23.026189", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-17T12:31:48.030734", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-17T12:31:23.026189", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -461,7 +461,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-17T12:31:23.026189", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-17T12:31:48.030734", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-17T12:31:23.026189", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -568,7 +568,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-19T01:49:07.462107", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-19T01:49:27.464587", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-19T01:49:07.462107", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -581,7 +581,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-19T01:49:07.462107", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-19T01:49:27.464587", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-19T01:49:07.462107", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -594,7 +594,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-19T01:49:07.462107", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-19T01:49:27.464587", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-19T01:49:07.462107", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -701,7 +701,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-17T10:58:50.209749", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-17T10:59:05.210061", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-17T10:58:50.209749", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -714,7 +714,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-17T10:58:50.209749", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-17T10:59:05.210061", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-17T10:58:50.209749", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -727,7 +727,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-17T10:58:50.209749", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-17T10:59:05.210061", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-17T10:58:50.209749", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -834,7 +834,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-16T18:36:27.354551", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-16T18:36:37.353521", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-16T18:36:27.354551", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -847,7 +847,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-16T18:36:27.354551", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-16T18:36:37.353521", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-16T18:36:27.354551", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -860,7 +860,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-16T18:36:27.354551", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-16T18:36:37.353521", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-16T18:36:27.354551", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -967,7 +967,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-24T06:37:05.984935", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-24T06:37:25.983459", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-24T06:37:05.984935", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -980,7 +980,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-24T06:37:05.984935", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-24T06:37:25.983459", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-24T06:37:05.984935", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -993,7 +993,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-24T06:37:05.984935", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-24T06:37:25.983459", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-24T06:37:05.984935", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -1100,7 +1100,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-19T05:52:44.433795", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-19T05:53:14.425137", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-19T05:52:44.433795", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -1113,7 +1113,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-19T05:52:44.433795", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-19T05:53:14.425137", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-19T05:52:44.433795", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -1126,7 +1126,7 @@ class TestEngine(unittest.TestCase):
              "value": {"filter": "MISSING", "op": "=="}}
         ],
                                             start_filters = [{"date": "2021-03-19T05:52:44.433795", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-19T05:53:14.425137", "op": "=="}])
+                                            stop_filters = [{"date": "2021-03-19T05:52:44.433795", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -1232,8 +1232,8 @@ class TestEngine(unittest.TestCase):
              "type": "text",
              "value": {"filter": "MISSING", "op": "=="}}
         ],
-                                            start_filters = [{"date": "2021-03-16T18:10:59.878756", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-16T18:16:12.831484", "op": "=="}])
+                                            start_filters = [{"date": "2021-03-16T18:11:09.878756", "op": "=="}],
+                                            stop_filters = [{"date": "2021-03-16T18:15:52.831484", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -1245,8 +1245,8 @@ class TestEngine(unittest.TestCase):
              "type": "text",
              "value": {"filter": "MISSING", "op": "=="}}
         ],
-                                            start_filters = [{"date": "2021-03-16T18:10:59.878756", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-16T18:16:12.831484", "op": "=="}])
+                                            start_filters = [{"date": "2021-03-16T18:11:09.878756", "op": "=="}],
+                                            stop_filters = [{"date": "2021-03-16T18:15:52.831484", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
@@ -1258,8 +1258,8 @@ class TestEngine(unittest.TestCase):
              "type": "text",
              "value": {"filter": "MISSING", "op": "=="}}
         ],
-                                            start_filters = [{"date": "2021-03-16T18:10:59.878756", "op": "=="}],
-                                            stop_filters = [{"date": "2021-03-16T18:16:12.831484", "op": "=="}])
+                                            start_filters = [{"date": "2021-03-16T18:11:09.878756", "op": "=="}],
+                                            stop_filters = [{"date": "2021-03-16T18:15:52.831484", "op": "=="}])
 
         assert len(events) == 1
         assert len([link for link in events[0].eventLinks if link.event_uuid_link == planned_imaging_event_uuid]) > 0
