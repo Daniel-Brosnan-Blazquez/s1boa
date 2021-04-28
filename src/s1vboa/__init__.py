@@ -15,7 +15,7 @@ import jinja2
 
 # Import vboa
 import vboa
-from s1vboa.views.dhus_completeness import dhus_completeness
+from s1vboa.views.dhus_availability import dhus_availability
 
 def create_app():
     """
@@ -24,7 +24,7 @@ def create_app():
     app = vboa.create_app()
 
     # Register the specific views
-    app.register_blueprint(dhus_completeness.bp)
+    app.register_blueprint(dhus_availability.bp)
     
     # Register the specific templates folder
     s2vboa_templates_folder = os.path.dirname(__file__) + "/templates"

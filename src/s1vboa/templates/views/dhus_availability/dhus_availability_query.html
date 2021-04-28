@@ -8,12 +8,12 @@
       </div>
       <div class="panel-body panel-collapse collapse" id="query-interface">
         <ul class="nav nav-tabs responsive-tabs">
-          <li class="active"><a href="#dhus-completeness-query-window">Query window</a></li>
-          <li><a href="#dhus-completeness-sliding-window">Sliding window</a></li>
+          <li class="active"><a href="#dhus-availability-query-window">Query window</a></li>
+          <li><a href="#dhus-availability-sliding-window">Sliding window</a></li>
         </ul>
         <div class="tab-content">
-          <div class="tab-pane active" id="dhus-completeness-query-window">
-            <form role="form" method=post action="/views/dhus-completeness">
+          <div class="tab-pane active" id="dhus-availability-query-window">
+            <form role="form" method=post action="/views/dhus-availability{{ view }}">
               <div>
                 <!-- Default values message -->
                 <div class="row">
@@ -32,7 +32,7 @@
                 {% endwith %}
                 <!-- Levels -->
                 {% with id = "levels-static-query" %}
-                {% include "views/dhus_completeness/levels.html" %}
+                {% include "views/dhus_availability/levels.html" %}
                 {% endwith %}
                 <br/>
                 <!-- Start and stop -->
@@ -45,7 +45,7 @@
                 <div class="row">
                   <div class="col-xs-3">
                     <label>Limit</label>
-                    <input type="text" class="form-control" style="width: 100%" name="limit" id="dhus-completeness-limit" value="20"/>
+                    <input type="text" class="form-control" style="width: 100%" name="limit" id="dhus-availability-limit" value="20"/>
                   </div>
                 </div>
                 <div>
@@ -54,8 +54,8 @@
               </div>
             </form>
           </div>
-          <div class="tab-pane" id="dhus-completeness-sliding-window">
-            <form role="form" method=post action="/views/sliding-dhus-completeness">
+          <div class="tab-pane" id="dhus-availability-sliding-window">
+            <form role="form" method=post action="/views/sliding-dhus-availability{{ view }}">
               <div>
                 <!-- Default values message -->
                 <div class="row">
@@ -75,28 +75,28 @@
                 {% endwith %}
                 <!-- Levels -->
                 {% with id = "levels-sliding-query" %}
-                {% include "views/dhus_completeness/levels.html" %}
+                {% include "views/dhus_availability/levels.html" %}
                 {% endwith %}
                 <br/>
                 <!-- Delay -->
                 <div class="row">
                   <div class="col-xs-3">
                     <label>Window delay (days)</label>
-                    <input type="text" class="form-control" name="dhus_completeness_window_delay" id="dhus-completeness-window-delay"/>
+                    <input type="text" class="form-control" name="dhus_availability_window_delay" id="dhus-availability-window-delay"/>
                   </div>
                 </div>
                 <!-- Duration -->
                 <div class="row">
                   <div class="col-xs-3">
                     <label>Window size (days)</label>
-                    <input type="text" class="form-control" name="dhus_completeness_window_size" id="dhus-completeness-window-size"/>
+                    <input type="text" class="form-control" name="dhus_availability_window_size" id="dhus-availability-window-size"/>
                   </div>
                 </div>
                 <!-- Repeat cycle (minutes) -->
                 <div class="row">
                   <div class="col-xs-3">
                     <label>Repeat cycle (minutes)</label>
-                    <input type="text" class="form-control" name="dhus_completeness_repeat_cycle" id="dhus-completeness-repeat-cycle"/>
+                    <input type="text" class="form-control" name="dhus_availability_repeat_cycle" id="dhus-availability-repeat-cycle"/>
                   </div>
                 </div>
                 <div>

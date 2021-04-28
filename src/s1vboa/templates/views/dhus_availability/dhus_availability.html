@@ -40,18 +40,28 @@
 {% do missing_dhus_products.update({"L2_OCN": dhus_product_completeness_l2_ocn_events["events"]|get_events_filtered_by_values([{"name": {"filter": "status", "op": "=="}, "value": {"filter": "MISSING", "op": "=="}}])}) %}
 {% do missing_dhus_products_duration.update({"L2_OCN": ((missing_dhus_products["L2_OCN"]|get_timeline_duration_from_events_json / 60))|round(3)}) %}
 
+<!-- Complete route with the view content -->
+{% if data["metadata"]["view_content"] == "completeness" %}
+{% set view = "?view=completeness" %}
+{% set title = "completeness" %}
+{% elif data["metadata"]["view_content"] == "timeliness" %}
+{% set view = "?view=timeliness" %}
+{% set title = "timeliness" %}
+{% else %}
+{% set title = "completeness and timeliness" %}
+{% endif %}
 
 {% block content %}
 <div class="row">
-  <h1 class="page-header">Data Availability in DHUS, completeness from planning</h1>
+  <h1 class="page-header">Data Availability in DHUS, {{ title }} from planning</h1>
 </div>
 <!-- /.row -->
 
-{% include "views/dhus_completeness/dhus_completeness_content.html" %}
+{% include "views/dhus_availability/dhus_availability_content.html" %}
 
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
-{#{% include "views/dhus_completeness/dhus_completeness_scripts.html" %}#}
+{#{% include "views/dhus_availability/dhus_availability_scripts.html" %}#}
 {% endblock %}

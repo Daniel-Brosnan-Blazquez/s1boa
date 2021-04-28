@@ -1,34 +1,38 @@
 <!-- Query -->
-{% include "views/dhus_completeness/dhus_completeness_query.html" %}
+{% include "views/dhus_availability/dhus_availability_query.html" %}
 
 {% include "views/common/header.html" %}
 
 <!-- Pagination -->
-{% with route = "/views/dhus-completeness-pages", elements = data["event_groups"]["planned_imaging"], filters = filters %}
+{% with route = "/views/dhus-availability-pages", elements = data["event_groups"]["planned_imaging"], filters = filters %}
 {% include "vboa/pagination.html" %}
 {% endwith %}
 
 <!-- Summary -->
-{% include "views/dhus_completeness/dhus_completeness_summary.html" %}
+{% include "views/dhus_availability/dhus_availability_summary.html" %}
 
 <!-- Content -->
 {% if data["event_groups"]["planned_imaging"]|length > 0 %}
 
 <!-- Maps -->
-{#{% include "views/dhus_completeness/dhus_completeness_maps.html" %}#}
+{#{% include "views/dhus_availability/dhus_availability_maps.html" %}#}
 
 <!-- End-to-end timeliness -->
-{#{% include "views/dhus_completeness/dhus_completeness_e2e_timeliness.html" %}#}
+{#{% include "views/dhus_availability/dhus_availability_e2e_timeliness.html" %}#}
 
 <!-- Table with missing disseminations -->
+{% if data["metadata"]["show"]["completeness"] %}
+
 {% if ("L0" in parsed_levels[0] and missing_dhus_products_duration["L0"] > 0) or ("L1_SLC" in parsed_levels[0] and missing_dhus_products_duration["L1_SLC"] > 0) or ("L1_GRD" in parsed_levels[0] and missing_dhus_products_duration["L1_GRD"] > 0) or ("L2_OCN" in parsed_levels[0] and missing_dhus_products_duration["L2_OCN"] > 0) %}
 {% set type_of_table = "MISSING" %}
-{% include "views/dhus_completeness/dhus_completeness_content_table.html" %}
+{% include "views/dhus_availability/dhus_availability_content_table.html" %}
+{% endif %}
+
 {% endif %}
 
 <!-- Complete table -->
 {% set type_of_table = "COMPLETE" %}
-{% include "views/dhus_completeness/dhus_completeness_content_table.html" %}
+{% include "views/dhus_availability/dhus_availability_content_table.html" %}
 
 {% else %}
 
@@ -36,11 +40,11 @@
   <div class="panel panel-default">
     <div class="panel-heading">
       <h3 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion" href="#dhus-completeness-no-planned-imaging">Data availability in DHUS <span class="fa fa-angle-double-down"></span></a>
+        <a data-toggle="collapse" data-parent="#accordion" href="#dhus-availability-no-planned-imaging">Data availability in DHUS <span class="fa fa-angle-double-down"></span></a>
       </h3>
     </div>
     <!-- /.panel-heading -->
-    <div class="panel-body panel-collapse collapse in" id="dhus-completeness-no-planned-imaging">
+    <div class="panel-body panel-collapse collapse in" id="dhus-availability-no-planned-imaging">
       <p>
         There are no planned imagings during the requested period.
       </p>

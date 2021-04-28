@@ -18,7 +18,7 @@
       </p>
       <a data-toggle="collapse" data-parent="#accordion" href="#dhus-completeness-columns-help-list-{{ type_of_table }}"><b>Columns help:</b> <span class="fa fa-angle-double-down"></span></a>
       <div class="panel-body panel-collapse collapse" id="dhus-completeness-columns-help-list-{{ type_of_table }}">
-        {% include "views/dhus_completeness/dhus_completeness_content_columns_help.html" %}
+        {% include "views/dhus_availability/dhus_availability_content_columns_help.html" %}
       </div>
       <!--table-->
       <table width="100%" class="table table-striped table-bordered table-hover table-search" id="dhus-completeness-list-table-{{ type_of_table }}">
@@ -35,7 +35,9 @@
             <th>Stop</th>
             <th>Status</th>
             <th>Product</th>
+            {% if data["metadata"]["show"]["timeliness"] %}
             <th>Time to DHUS publication (m)</th>
+            {% endif %}
             <th>Datatake id</th>
             <th>Start</th>
             <th>Stop</th>
@@ -90,13 +92,15 @@
             {% endif %}
             <td>{{ completeness["start"] }}</td>
             <td>{{ completeness["stop"] }}</td>
-            <td><a class="{{ status_class }}" href="/views/dhus-completeness-by-datatake/{{ planned_imaging.event_uuid }}">{{ status }}</a></td>
+            <td><a class="{{ status_class }}" href="/views/dhus-availability-by-datatake/{{ planned_imaging.event_uuid }}">{{ status }}</a></td>
             {% if dhus_product != "N/A" %}
             <td>{{ dhus_product }}</td>
             {% else %}
             <td><a class="{{ status_class }}">{{ dhus_product }}</a></td>
             {% endif %}
+            {% if data["metadata"]["show"]["timeliness"] %}
             <td><a class="{{ status_class }}">{{ time_to_dhus }}</a></td>
+            {% endif %}
             <td>{{ datatake_id }}</td>
             <td>{{ planned_imaging["start"] }}</td>
             <td>{{ planned_imaging["stop"] }}</td>
@@ -113,7 +117,9 @@
             <th>Stop</th>
             <th>Status</th>
             <th>Product</th>
+            {% if data["metadata"]["show"]["timeliness"] %}
             <th>Time to DHUS publication (m)</th>
+            {% endif %}
             <th>Datatake id</th>
             <th>Start</th>
             <th>Stop</th>
