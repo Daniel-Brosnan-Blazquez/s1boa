@@ -14,6 +14,8 @@
 {% set dhus_product_completeness_l1_grd_events = data|get_events_json(data["event_groups"]["dhus_product_completeness_l1_grd"]) %}
 {% set dhus_product_completeness_l2_ocn_events = data|get_events_json(data["event_groups"]["dhus_product_completeness_l2_ocn"]) %}
 
+<!-- Completeness -->
+{% if data["metadata"]["view_content"] == "completeness" %}
 <!-- Expected acquired MSI duration from planning -->
 {% set expected_acquisition_duration = ((data|get_timeline_duration_from_data_json(data["event_groups"]["planned_imaging"])) / 60)|round(3) %}
 
@@ -39,6 +41,8 @@
 <!-- L2_OCN -->
 {% do missing_dhus_products.update({"L2_OCN": dhus_product_completeness_l2_ocn_events["events"]|get_events_filtered_by_values([{"name": {"filter": "status", "op": "=="}, "value": {"filter": "MISSING", "op": "=="}}])}) %}
 {% do missing_dhus_products_duration.update({"L2_OCN": ((missing_dhus_products["L2_OCN"]|get_timeline_duration_from_events_json / 60))|round(3)}) %}
+
+{% endif %}
 
 <!-- Complete route with the view content -->
 {% if data["metadata"]["view_content"] == "completeness" %}
