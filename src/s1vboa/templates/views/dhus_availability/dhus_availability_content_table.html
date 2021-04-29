@@ -3,7 +3,6 @@
     <div class="panel-heading">
       <h3 class="panel-title">
         {% if type_of_table == "COMPLETE" %}
-        {% set list_products_completeness = dhus_product_completeness_l0_events["events"] + dhus_product_completeness_l1_slc_events["events"] + dhus_product_completeness_l1_grd_events["events"] + dhus_product_completeness_l2_ocn_events["events"] %}
         <a data-toggle="collapse" data-parent="#accordion" href="#dhus-completeness-list-{{ type_of_table }}">Data availability in DHUS <span class="fa fa-angle-double-down"></span></a>
         {% else %}
         {% set list_products_completeness = missing_dhus_products["L0"] + missing_dhus_products["L1_SLC"] + missing_dhus_products["L1_GRD"] + missing_dhus_products["L2_OCN"] %}
@@ -22,9 +21,16 @@
       </div>
       <!--table-->
       <table width="100%" class="table table-striped table-bordered table-hover table-search" id="dhus-completeness-list-table-{{ type_of_table }}">
+        {% set product_information_columns = 9 %}
+        {% if data["metadata"]["show"]["timeliness"] %}
+        {% set product_information_columns = product_information_columns + 1 %}
+        {% endif %}
+        {% if data["metadata"]["show"]["volumes"] %}
+        {% set product_information_columns = product_information_columns + 1 %}
+        {% endif %}
         <thead>
           <tr>
-            <th colspan="8">Product information</th>
+            <th colspan="{{ product_information_columns }}">Product information</th>
             <th colspan="3">Planned imaging</th>
           </tr>
           <tr>
@@ -33,6 +39,7 @@
             <th>Orbit</th>
             <th>Start</th>
             <th>Stop</th>
+            <th>Duration (m)</th>
             <th>Status</th>
             <th>Product</th>
             {% if data["metadata"]["show"]["timeliness"] %}
@@ -41,6 +48,7 @@
             <th>Datatake id</th>
             <th>Start</th>
             <th>Stop</th>
+            <th>Datatake duration (m)</th>
           </tr>
         </thead>
         <tbody>
@@ -53,7 +61,7 @@
           {% set level = completeness["gauge"]["name"].replace("PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_", "") %}
 
           <!-- Obtain relevant values -->
-          {% set values = completeness|get_values([{"name": {"filter": "satellite","op": "=="}, "group":"satellite"}, {"name": {"filter": ".*orbit","op": "regex"}, "group":"orbit"}, {"name": {"filter": "status","op": "=="}, "group":"status"}, {"name": {"filter": "datatake_id","op": "=="}, "group":"datatake_id"}]) %}
+          {% set values = completeness|get_values([{"name": {"filter": "satellite","op": "=="}, "group":"satellite"}, {"name": {"filter": ["orbit","start_orbit"],"op": "in"}, "group":"orbit"}, {"name": {"filter": "status","op": "=="}, "group":"status"}, {"name": {"filter": "datatake_id","op": "=="}, "group":"datatake_id"}]) %}
           <!-- Obtain satellite -->
           {% set satellite = values["satellite"][0]["value"] %}
 
@@ -86,15 +94,16 @@
             <td>{{ level }}</td>
             <td>{{ satellite }}</td>
             {% if planned_imaging %}
-            <td><a href="/eboa_nav/query-event-links/{{ planned_imaging['event_uuid'] }}">{{ orbit }}</a></td>
+            <td><a href="/eboa_nav/query-event-links/{{ planned_imaging.event_uuid }}">{{ orbit }}</a></td>
             {% else %}
             <td>{{ orbit }}</td>
             {% endif %}
-            <td>{{ completeness["start"] }}</td>
-            <td>{{ completeness["stop"] }}</td>
+            <td>{{ completeness.start }}</td>
+            <td>{{ completeness.stop }}</td>
+            <td>{{ (completeness.duration / 60)|round(3) }}</td>
             <td><a class="{{ status_class }}" href="/views/dhus-availability-by-datatake/{{ planned_imaging.event_uuid }}">{{ status }}</a></td>
             {% if dhus_product != "N/A" %}
-            <td>{{ dhus_product }}</td>
+            <td><a href="/eboa_nav/query-event-links/{{ completeness.event_uuid }}">{{ dhus_product }}</a></td>
             {% else %}
             <td><a class="{{ status_class }}">{{ dhus_product }}</a></td>
             {% endif %}
@@ -102,8 +111,15 @@
             <td><a class="{{ status_class }}">{{ time_to_dhus }}</a></td>
             {% endif %}
             <td>{{ datatake_id }}</td>
-            <td>{{ planned_imaging["start"] }}</td>
-            <td>{{ planned_imaging["stop"] }}</td>
+            {% if planned_imaging %}
+            <td>{{ planned_imaging.start }}</td>
+            <td>{{ planned_imaging.stop }}</td>
+            <td>{{ (planned_imaging.duration / 60)|round(3) }}</td>
+            {% else %}
+            <td><a class="bold-red">N/A</a></td>
+            <td><a class="bold-red">N/A</a></td>
+            <td><a class="bold-red">N/A</a></td>
+            {% endif %}
           </tr>
           
           {% endfor %}
@@ -115,6 +131,7 @@
             <th>Orbit</th>
             <th>Start</th>
             <th>Stop</th>
+            <th>Duration (m)</th>
             <th>Status</th>
             <th>Product</th>
             {% if data["metadata"]["show"]["timeliness"] %}
@@ -123,6 +140,7 @@
             <th>Datatake id</th>
             <th>Start</th>
             <th>Stop</th>
+            <th>Datatake duration (m)</th>
           </tr>
         </tfoot>
       </table>
