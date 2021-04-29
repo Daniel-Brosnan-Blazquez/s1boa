@@ -1,0 +1,96 @@
+<script type="text/javascript">
+
+  {% if data["event_groups"]["planned_imaging"]|length > 0 %}
+
+  {% include "js/dhus_availability/dhus_availability_functions.js" %}
+  
+  {% include "js/dhus_availability/dhus_availability_data_for_widgets.js" %}
+
+  {% if data["metadata"]["view_content"] == "completeness" %}
+  {# Pie L0 completeness #}
+  {% if "L0" in parsed_levels[0] and expected_dhus_products_duration["L0"] > 0 %}
+  l0_completeness = [{{ expected_dhus_products_duration["L0"] - missing_dhus_products_duration["L0"] }}, {{ missing_dhus_products_duration["L0"] }}]
+  l0_completeness_background_color = ["green", "darkred"]
+  l0_completeness_labels = ["L0 available in DHUS", "L0 missing in DHUS"]
+
+  var data = {
+  datasets: [{
+  data: l0_completeness,
+  backgroundColor: l0_completeness_background_color
+  }],
+  labels: l0_completeness_labels
+  }
+  
+  vboa.display_pie("dhus-availability-pie-l0-completeness", data)
+  {% endif %}
+
+  {# Pie L1_SLC completeness #}
+  {% if "L1_SLC" in parsed_levels[0] and expected_dhus_products_duration["L1_SLC"] > 0 %}
+  l1_slc_completeness = [{{ expected_dhus_products_duration["L1_SLC"] - missing_dhus_products_duration["L1_SLC"] }}, {{ missing_dhus_products_duration["L1_SLC"] }}]
+  l1_slc_completeness_background_color = ["green", "darkred"]
+  l1_slc_completeness_labels = ["L1_SLC available in DHUS", "L1_SLC missing in DHUS"]
+
+  var data = {
+  datasets: [{
+  data: l1_slc_completeness,
+  backgroundColor: l1_slc_completeness_background_color
+  }],
+  labels: l1_slc_completeness_labels
+  }
+  
+  vboa.display_pie("dhus-availability-pie-l1-slc-completeness", data)
+  {% endif %}
+
+  {# Pie L1_GRD completeness #}
+  {% if "L1_GRD" in parsed_levels[0] and expected_dhus_products_duration["L1_GRD"] > 0 %}
+  l1_grd_completeness = [{{ expected_dhus_products_duration["L1_GRD"] - missing_dhus_products_duration["L1_GRD"] }}, {{ missing_dhus_products_duration["L1_GRD"] }}]
+  l1_grd_completeness_background_color = ["green", "darkred"]
+  l1_grd_completeness_labels = ["L1_GRD available in DHUS", "L1_GRD missing in DHUS"]
+
+  var data = {
+  datasets: [{
+  data: l1_grd_completeness,
+  backgroundColor: l1_grd_completeness_background_color
+  }],
+  labels: l1_grd_completeness_labels
+  }
+  
+  vboa.display_pie("dhus-availability-pie-l1-grd-completeness", data)
+  {% endif %}
+
+  {# Pie L2_OCN completeness #}
+  {% if "L2_OCN" in parsed_levels[0] and expected_dhus_products_duration["L2_OCN"] > 0 %}
+  l2_ocn_completeness = [{{ expected_dhus_products_duration["L2_OCN"] - missing_dhus_products_duration["L2_OCN"] }}, {{ missing_dhus_products_duration["L2_OCN"] }}]
+  l2_ocn_completeness_background_color = ["green", "darkred"]
+  l2_ocn_completeness_labels = ["L2_OCN available in DHUS", "L2_OCN missing in DHUS"]
+
+  var data = {
+  datasets: [{
+  data: l2_ocn_completeness,
+  backgroundColor: l2_ocn_completeness_background_color
+  }],
+  labels: l2_ocn_completeness_labels
+  }
+  
+  vboa.display_pie("dhus-availability-pie-l2-ocn-completeness", data)
+  {% endif %}
+
+  var groups = [];
+  var items = [];
+
+  vboa.prepare_events_data_for_timeline(dhus_availability_data_timeline, items, groups);
+  vboa.display_timeline("dhus-availability-timeline", items, groups);
+  {% endif %}
+  
+  {% if sliding_window %}
+  var parameters = {
+      "window_delay": "{{ sliding_window['window_delay'] }}",
+      "window_size": "{{ sliding_window['window_size'] }}",
+      "mission": "{{ sliding_window['mission'] }}",
+      "levels": "{{ sliding_window['levels'] }}"
+  }
+  var repeat_cycle = {{ sliding_window['repeat_cycle'] }}
+  vboa.update_view(parameters, repeat_cycle, "/views/sliding-dhus-availability-parameters");
+  {% endif %}
+  {% endif %}
+</script>

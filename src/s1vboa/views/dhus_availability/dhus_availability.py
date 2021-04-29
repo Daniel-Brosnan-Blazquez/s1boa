@@ -343,20 +343,41 @@ def query_dhus_availability_structure(start_filter, stop_filter, mission, levels
         include_ers = False
     # end if
 
+    # Organize events
+    dhus_product_completeness_l0 = []
+    dhus_product_completeness_l1_slc = []
+    dhus_product_completeness_l1_grd = []
+    dhus_product_completeness_l2_ocn = []
+    for event in planned_imaging_events["linking_events"]["DHUS_PRODUCT_COMPLETENESS"]:
+        if levels in ["ALL", "L0"] and event.gauge.name == "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L0":
+            dhus_product_completeness_l0.append(event)
+        elif levels in ["ALL", "L1_SLC"] and event.gauge.name == "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L1_SLC":
+            dhus_product_completeness_l1_slc.append(event)
+        elif levels in ["ALL", "L1_GRD"] and event.gauge.name == "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L1_GRD":
+            dhus_product_completeness_l1_grd.append(event)
+        elif levels in ["ALL", "L2_OCN"] and event.gauge.name == "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L2_OCN":
+            dhus_product_completeness_l2_ocn.append(event)
+        # end if
+    # end for
+
     # Export DHUS_PRODUCT_COMPLETENESS events for L0
-    dhus_product_completeness_l0 = [event for event in planned_imaging_events["linking_events"]["DHUS_PRODUCT_COMPLETENESS"] if event.gauge.name == "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L0"]
-    eboa_export.export_events(data, dhus_product_completeness_l0, group = "dhus_product_completeness_l0", include_ers = include_ers)
+    if levels in ["ALL", "L0"]:
+        eboa_export.export_events(data, dhus_product_completeness_l0, group = "dhus_product_completeness_l0", include_ers = include_ers)
+    # end if
     
     # Export DHUS_PRODUCT_COMPLETENESS events for L1 SLC
-    dhus_product_completeness_l1_slc = [event for event in planned_imaging_events["linking_events"]["DHUS_PRODUCT_COMPLETENESS"] if event.gauge.name == "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L1_SLC"]
-    eboa_export.export_events(data, dhus_product_completeness_l1_slc, group = "dhus_product_completeness_l1_slc", include_ers = include_ers)
+    if levels in ["ALL", "L1_SLC"]:
+        eboa_export.export_events(data, dhus_product_completeness_l1_slc, group = "dhus_product_completeness_l1_slc", include_ers = include_ers)
+    # end if
 
     # Export DHUS_PRODUCT_COMPLETENESS events for L1 GRD
-    dhus_product_completeness_l1_grd = [event for event in planned_imaging_events["linking_events"]["DHUS_PRODUCT_COMPLETENESS"] if event.gauge.name == "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L1_GRD"]
-    eboa_export.export_events(data, dhus_product_completeness_l1_grd, group = "dhus_product_completeness_l1_grd", include_ers = include_ers)
+    if levels in ["ALL", "L1_GRD"]:
+        eboa_export.export_events(data, dhus_product_completeness_l1_grd, group = "dhus_product_completeness_l1_grd", include_ers = include_ers)
+    # end if
 
     # Export DHUS_PRODUCT_COMPLETENESS events for L2 OCN
-    dhus_product_completeness_l2_ocn = [event for event in planned_imaging_events["linking_events"]["DHUS_PRODUCT_COMPLETENESS"] if event.gauge.name == "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L2_OCN"]
-    eboa_export.export_events(data, dhus_product_completeness_l2_ocn, group = "dhus_product_completeness_l2_ocn", include_ers = include_ers)
+    if levels in ["ALL", "L2_OCN"]:
+        eboa_export.export_events(data, dhus_product_completeness_l2_ocn, group = "dhus_product_completeness_l2_ocn", include_ers = include_ers)
+    # end if
 
     return data

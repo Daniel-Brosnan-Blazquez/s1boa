@@ -7,12 +7,24 @@
 {% do parsed_levels.append(data["metadata"]["levels"]) %}
 {% endif %}
 
-<!-- Group of events -->
+<!-- 
+Group of events
+ -->
+<!-- Planned imaging -->
 {% set planned_imaging_events = data|get_events_json(data["event_groups"]["planned_imaging"]) %}
+
+<!-- Completeness L0 -->
 {% set dhus_product_completeness_l0_events = data|get_events_json(data["event_groups"]["dhus_product_completeness_l0"]) %}
+<!-- Completeness L1_SLC -->
 {% set dhus_product_completeness_l1_slc_events = data|get_events_json(data["event_groups"]["dhus_product_completeness_l1_slc"]) %}
+<!-- Completeness L1_GRD -->
 {% set dhus_product_completeness_l1_grd_events = data|get_events_json(data["event_groups"]["dhus_product_completeness_l1_grd"]) %}
+<!-- Completeness L2_OCN -->
 {% set dhus_product_completeness_l2_ocn_events = data|get_events_json(data["event_groups"]["dhus_product_completeness_l2_ocn"]) %}
+
+<!-- Completeness ALL -->
+{% set list_products_completeness = dhus_product_completeness_l0_events["events"] + dhus_product_completeness_l1_slc_events["events"] + dhus_product_completeness_l1_grd_events["events"] + dhus_product_completeness_l2_ocn_events["events"] %}
+
 
 <!-- Completeness -->
 {% if data["metadata"]["view_content"] == "completeness" %}
@@ -67,5 +79,5 @@
 
 {% block scripts %}
 {{ super() }}
-{#{% include "views/dhus_availability/dhus_availability_scripts.html" %}#}
+{% include "views/dhus_availability/dhus_availability_scripts.html" %}
 {% endblock %}
