@@ -77,6 +77,64 @@ class TestEngine(unittest.TestCase):
 
         assert len(events) == 36
 
+        # Check number of alerts generated
+        event_alerts = self.query_eboa.get_event_alerts()
+
+        assert len(event_alerts) == 27
+
+        # Check number of alerts generated
+        filters = {}
+        filters["gauge_names"] = {"filter": "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L0", "op": "=="}
+        filters["names"] = {"filter": "ALERT-0001: MISSING L0 DHUS PRODUCT", "op": "=="}
+        filters["groups"] = {"filter": "S1_PLANNING", "op": "=="}
+        filters["severities"] = {"filter": "fatal", "op": "=="}
+        filters["generators"] = {"filter": "ingestion_nppf.py", "op": "=="}
+        alerts_planned_imaging = self.query_eboa.get_event_alerts(filters)
+
+        assert len(alerts_planned_imaging) == 8
+
+        assert alerts_planned_imaging[0].message == "The L0 product related to the datatake id 45B92 and corresponding to the planned imaging with mode EXTRA_WIDE_SWATH and timings 2021-03-16T18:10:59.878756_2021-03-16T18:16:12.831484 over orbit 37027 has not been published"
+
+        # Check number of alerts generated
+        filters = {}
+        filters["gauge_names"] = {"filter": "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L1_SLC", "op": "=="}
+        filters["names"] = {"filter": "ALERT-0002: MISSING L1 SLC DHUS PRODUCT", "op": "=="}
+        filters["groups"] = {"filter": "S1_PLANNING", "op": "=="}
+        filters["severities"] = {"filter": "fatal", "op": "=="}
+        filters["generators"] = {"filter": "ingestion_nppf.py", "op": "=="}
+        alerts_planned_imaging = self.query_eboa.get_event_alerts(filters)
+
+        assert len(alerts_planned_imaging) == 8
+
+        assert alerts_planned_imaging[0].message == "The L1 SLC product related to the datatake id 45B94 and corresponding to the planned imaging with mode WAVE and timings 2021-03-16T18:19:42.153551_2021-03-16T18:35:48.853967 over orbit 37027 has not been published"
+        
+        # Check number of alerts generated
+        filters = {}
+        filters["gauge_names"] = {"filter": "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L1_GRD", "op": "=="}
+        filters["names"] = {"filter": "ALERT-0003: MISSING L1 GRD DHUS PRODUCT", "op": "=="}
+        filters["groups"] = {"filter": "S1_PLANNING", "op": "=="}
+        filters["severities"] = {"filter": "fatal", "op": "=="}
+        filters["generators"] = {"filter": "ingestion_nppf.py", "op": "=="}
+        alerts_planned_imaging = self.query_eboa.get_event_alerts(filters)
+
+        assert len(alerts_planned_imaging) == 8
+
+        assert alerts_planned_imaging[0].message == "The L1 GRD product related to the datatake id 45B92 and corresponding to the planned imaging with mode EXTRA_WIDE_SWATH and timings 2021-03-16T18:10:59.878756_2021-03-16T18:16:12.831484 over orbit 37027 has not been published"
+
+        # Check number of alerts generated
+        filters = {}
+        filters["gauge_names"] = {"filter": "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L2_OCN", "op": "=="}
+        filters["names"] = {"filter": "ALERT-0004: MISSING L2 OCN DHUS PRODUCT", "op": "=="}
+        filters["groups"] = {"filter": "S1_PLANNING", "op": "=="}
+        filters["severities"] = {"filter": "fatal", "op": "=="}
+        filters["generators"] = {"filter": "ingestion_nppf.py", "op": "=="}
+        alerts_planned_imaging = self.query_eboa.get_event_alerts(filters)
+
+        assert len(alerts_planned_imaging) == 3
+
+        assert alerts_planned_imaging[0].message == "The L2 OCN product related to the datatake id 45B92 and corresponding to the planned imaging with mode EXTRA_WIDE_SWATH and timings 2021-03-16T18:10:59.878756_2021-03-16T18:16:12.831484 over orbit 37027 has not been published"
+
+
         #####
         # Check ECC 8 - IW
         #####
