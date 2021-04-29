@@ -9,8 +9,51 @@
     </div>
     <!-- /.panel-heading -->
     <div class="panel-body panel-collapse collapse in" id="summary-dhus-availability-completeness">
+      <!-- Completeness pie charts -->
       <div class="row">
+        <!-- L0 completeness pie chart -->
+        {% if "L0" in parsed_levels[0] and expected_dhus_products_duration["L0"] > 0 %}
+        <div class="col-xs-3">
+          <div class="panel panel-primary">
+            <div class="panel-heading" align="center" style="font-size: 20px">L0 availability in DHUS</div>
+            <div class="panel-body" align="center" style="font-size: 50px; color: steelblue"><canvas id="dhus-availability-pie-l0-completeness" width="400" height="300"></canvas></div>
+          </div>
+        </div>
+        {% endif %}
 
+        <!-- L1_SLC completeness pie chart -->
+        {% if "L1_SLC" in parsed_levels[0] and expected_dhus_products_duration["L1_SLC"] > 0 %}
+        <div class="col-xs-3">
+          <div class="panel panel-primary">
+            <div class="panel-heading" align="center" style="font-size: 20px">L1_SLC availability in DHUS</div>
+            <div class="panel-body" align="center" style="font-size: 50px; color: steelblue"><canvas id="dhus-availability-pie-l1-slc-completeness" width="400" height="300"></canvas></div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- L1_GRD completeness pie chart -->
+        {% if "L1_GRD" in parsed_levels[0] and expected_dhus_products_duration["L1_GRD"] > 0 %}
+        <div class="col-xs-3">
+          <div class="panel panel-primary">
+            <div class="panel-heading" align="center" style="font-size: 20px">L1_GRD availability in DHUS</div>
+            <div class="panel-body" align="center" style="font-size: 50px; color: steelblue"><canvas id="dhus-availability-pie-l1-grd-completeness" width="400" height="300"></canvas></div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- L2_OCN completeness pie chart -->
+        {% if "L2_OCN" in parsed_levels[0] and expected_dhus_products_duration["L2_OCN"] > 0 %}
+        <div class="col-xs-3">
+          <div class="panel panel-primary">
+            <div class="panel-heading" align="center" style="font-size: 20px">L2_OCN availability in DHUS</div>
+            <div class="panel-body" align="center" style="font-size: 50px; color: steelblue"><canvas id="dhus-availability-pie-l2-ocn-completeness" width="400" height="300"></canvas></div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Completeness summaries -->
+      <div class="row">
         <div class="col-xs-3">
           <div class="panel panel-primary">
             <div class="panel-heading" align="center" style="font-size: 20px">Expected acquired radar image duration (m)</div>
