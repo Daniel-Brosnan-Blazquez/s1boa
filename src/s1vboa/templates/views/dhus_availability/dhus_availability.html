@@ -25,9 +25,7 @@ Group of events
 <!-- Completeness ALL -->
 {% set list_products_completeness = dhus_product_completeness_l0_events["events"] + dhus_product_completeness_l1_slc_events["events"] + dhus_product_completeness_l1_grd_events["events"] + dhus_product_completeness_l2_ocn_events["events"] %}
 
-
 <!-- Completeness -->
-{% if data["metadata"]["view_content"] == "completeness" %}
 <!-- Expected acquired MSI duration from planning -->
 {% set expected_acquisition_duration = ((data|get_timeline_duration_from_data_json(data["event_groups"]["planned_imaging"])) / 60)|round(3) %}
 
@@ -54,22 +52,23 @@ Group of events
 {% do missing_dhus_products.update({"L2_OCN": dhus_product_completeness_l2_ocn_events["events"]|get_events_filtered_by_values([{"name": {"filter": "status", "op": "=="}, "value": {"filter": "MISSING", "op": "=="}}])}) %}
 {% do missing_dhus_products_duration.update({"L2_OCN": ((missing_dhus_products["L2_OCN"]|get_timeline_duration_from_events_json / 60))|round(3)}) %}
 
-{% endif %}
-
 <!-- Complete route with the view content -->
 {% if data["metadata"]["view_content"] == "completeness" %}
 {% set view = "?view=completeness" %}
-{% set title = "completeness" %}
+{% set title = "completeness from planning view" %}
 {% elif data["metadata"]["view_content"] == "timeliness" %}
 {% set view = "?view=timeliness" %}
-{% set title = "timeliness" %}
+{% set title = "timeliness from planning view" %}
+{% elif data["metadata"]["view_content"] == "volumes" %}
+{% set view = "?view=volumes" %}
+{% set title = "data volumes view" %}
 {% else %}
-{% set title = "completeness and timeliness" %}
+{% set title = "completeness and timeliness from planning and data volumes view" %}
 {% endif %}
 
 {% block content %}
 <div class="row">
-  <h1 class="page-header">Data Availability in DHUS, {{ title }} from planning</h1>
+  <h1 class="page-header">Data Availability in DHUS, {{ title }}</h1>
 </div>
 <!-- /.row -->
 

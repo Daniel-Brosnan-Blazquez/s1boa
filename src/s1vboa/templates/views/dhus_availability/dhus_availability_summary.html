@@ -1,5 +1,5 @@
 <!-- Completeness -->
-{% if data["metadata"]["view_content"] == "completeness" %}
+{% if data["metadata"]["show"]["completeness"] %}
 <div class="row">
   <div class="panel panel-default">
     <div class="panel-heading">
@@ -131,7 +131,7 @@
 {% endif %}
 
 <!-- Timeliness -->
-{% if data["metadata"]["view_content"] == "timeliness" %}
+{% if data["metadata"]["show"]["timeliness"] %}
 <div class="row">
   <div class="panel panel-default">
     <div class="panel-heading">

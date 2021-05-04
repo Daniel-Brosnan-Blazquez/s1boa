@@ -18,7 +18,11 @@
 {#{% include "views/dhus_availability/dhus_availability_maps.html" %}#}
 
 <!-- End-to-end timeliness -->
-{#{% include "views/dhus_availability/dhus_availability_e2e_timeliness.html" %}#}
+{% if data["metadata"]["show"]["timeliness"] %}
+
+{% include "views/dhus_availability/dhus_availability_e2e_timeliness.html" %}
+
+{% endif %}
 
 <!-- Table with missing disseminations -->
 {% if data["metadata"]["show"]["completeness"] %}

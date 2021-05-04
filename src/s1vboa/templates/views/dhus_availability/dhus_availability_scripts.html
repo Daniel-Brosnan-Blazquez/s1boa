@@ -6,7 +6,123 @@
   
   {% include "js/dhus_availability/dhus_availability_data_for_widgets.js" %}
 
-  {% if data["metadata"]["view_content"] == "completeness" %}
+  {% if data["metadata"]["show"]["timeliness"] %}
+
+  {% if "L0" in parsed_levels[0] and (expected_dhus_products_duration["L0"] - missing_dhus_products_duration["L0"]) > 0 %}
+
+  var groups = [];
+  var items = [];
+
+  vboa.prepare_events_data_for_bar(dhus_availability_data_timeliness["L0"], items, groups);
+
+  var options = {
+  legend: true,
+  style: "bar",
+  barChart: {width:50, align:'center', sideBySide:true},
+  height: 350,
+  dataAxis: {
+  left: {
+  range: {
+  min: 0
+  },
+  title: {
+  text: "Delta time to DHUS (m)",
+  }
+  }
+  }
+  };
+  
+  vboa.display_bar_time("dhus-availability-timeliness-l0", items, groups, options);
+
+  {% endif %}
+
+  {% if "L1_SLC" in parsed_levels[0] and (expected_dhus_products_duration["L1_SLC"] - missing_dhus_products_duration["L1_SLC"]) > 0 %}
+
+  var groups = [];
+  var items = [];
+
+  vboa.prepare_events_data_for_bar(dhus_availability_data_timeliness["L1_SLC"], items, groups);
+
+  var options = {
+  legend: true,
+  style: "bar",
+  barChart: {width:50, align:'center', sideBySide:true},
+  height: 350,
+  dataAxis: {
+  left: {
+  range: {
+  min: 0
+  },
+  title: {
+  text: "Delta time to DHUS (m)",
+  }
+  }
+  }
+  };
+  
+  vboa.display_bar_time("dhus-availability-timeliness-l1-slc", items, groups, options);
+
+  {% endif %}
+
+  {% if "L1_GRD" in parsed_levels[0] and (expected_dhus_products_duration["L1_GRD"] - missing_dhus_products_duration["L1_GRD"]) > 0 %}
+
+  var groups = [];
+  var items = [];
+
+  vboa.prepare_events_data_for_bar(dhus_availability_data_timeliness["L1_GRD"], items, groups);
+
+  var options = {
+  legend: true,
+  style: "bar",
+  barChart: {width:50, align:'center', sideBySide:true},
+  height: 350,
+  dataAxis: {
+  left: {
+  range: {
+  min: 0
+  },
+  title: {
+  text: "Delta time to DHUS (m)",
+  }
+  }
+  }
+  };
+  
+  vboa.display_bar_time("dhus-availability-timeliness-l1-grd", items, groups, options);
+
+  {% endif %}
+
+  {% if "L2_OCN" in parsed_levels[0] and (expected_dhus_products_duration["L2_OCN"] - missing_dhus_products_duration["L2_OCN"]) > 0 %}
+
+  var groups = [];
+  var items = [];
+
+  vboa.prepare_events_data_for_bar(dhus_availability_data_timeliness["L2_OCN"], items, groups);
+
+  var options = {
+  legend: true,
+  style: "bar",
+  barChart: {width:50, align:'center', sideBySide:true},
+  height: 350,
+  dataAxis: {
+  left: {
+  range: {
+  min: 0
+  },
+  title: {
+  text: "Delta time to DHUS (m)",
+  }
+  }
+  }
+  };
+  
+  vboa.display_bar_time("dhus-availability-timeliness-l2-ocn", items, groups, options);
+
+  {% endif %}
+
+  {% endif %}
+  
+  {% if data["metadata"]["show"]["completeness"] %}
   {# Pie L0 completeness #}
   {% if "L0" in parsed_levels[0] and expected_dhus_products_duration["L0"] > 0 %}
   l0_completeness = [{{ expected_dhus_products_duration["L0"] - missing_dhus_products_duration["L0"] }}, {{ missing_dhus_products_duration["L0"] }}]

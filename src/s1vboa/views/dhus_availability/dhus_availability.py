@@ -264,19 +264,29 @@ def query_dhus_availability_and_render(start_filter, stop_filter, mission, level
         route = "views/dhus_availability/dhus_availability_datatake.html"
     # end if
 
-    metadata["show"] = {
-        "completeness": True,
-        "timeliness": True
-    }
     if view_content == "completeness":
         metadata["show"] = {
             "completeness": True,
-            "timeliness": False
+            "timeliness": False,
+            "volumes": False
         }        
     elif view_content == "timeliness":
         metadata["show"] = {
             "completeness": False,
-            "timeliness": True
+            "timeliness": True,
+            "volumes": False
+        }        
+    elif view_content == "volumes":
+        metadata["show"] = {
+            "completeness": False,
+            "timeliness": False,
+            "volumes": True
+        }        
+    else:
+        metadata["show"] = {
+            "completeness": True,
+            "timeliness": True,
+            "volumes": True
         }        
     # end if
     metadata["view_content"] = view_content
@@ -340,7 +350,7 @@ def query_dhus_availability_structure(start_filter, stop_filter, mission, levels
     if view_content == "completeness":
         include_ers = False
     else:
-        include_ers = False
+        include_ers = True
     # end if
 
     # Organize events

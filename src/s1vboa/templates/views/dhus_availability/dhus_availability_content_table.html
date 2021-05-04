@@ -45,6 +45,9 @@
             {% if data["metadata"]["show"]["timeliness"] %}
             <th>Time to DHUS publication (m)</th>
             {% endif %}
+            {% if data["metadata"]["show"]["volumes"] %}
+            <th>Size (GB)</th>
+            {% endif %}
             <th>Datatake id</th>
             <th>Start</th>
             <th>Stop</th>
@@ -76,7 +79,8 @@
 
           <!-- Obtain information related to the product if available -->
           {% set dhus_product = "N/A" %}
-          {% set time_to_dhus = "N/A" %}
+          {% set delta_to_dhus = "N/A" %}
+          {% set size = "N/A" %}
           {% if "explicit_reference" in completeness %}
           {% set dhus_product = completeness["explicit_reference"]["name"] %}
           {% endif %}
@@ -87,6 +91,27 @@
           {% elif status == "UNEXPECTED" %}
           {% set status_class = "bold-blue" %}
           {% else %}
+          
+          {% if data["metadata"]["show"]["timeliness"] or data["metadata"]["show"]["volumes"] %}
+          {% set er = data["explicit_references"][completeness["explicit_reference"]["uuid"]] %}
+
+          {% set annotations = er|get_annotations([{"name": {"filter": "DHUS_METADATA_INFORMATION","op": "=="}, "group":"metadata"}, {"name": {"filter": "DHUS_PUBLICATION_TIME","op": "=="}, "group":"publication_time"}]) %}
+          
+          {% if data["metadata"]["show"]["timeliness"] %}
+          {% set publication_time_values = annotations["publication_time"]|get_annotations_from_data(data)|first|get_values([{"name": {"filter": "dhus_publication_time","op": "=="}, "group":"publication_time"}]) %}
+
+          {% set delta_to_dhus = (publication_time_values["publication_time"][0]["value"]|date_op(completeness.start, "-") / 60)|round(3) %}
+          
+          {% endif %}
+          
+          {% if data["metadata"]["show"]["volumes"] %}
+          {% set size_values = annotations["metadata"]|get_annotations_from_data(data)|first|get_values([{"name": {"filter": "size","op": "=="}, "group":"size"}]) %}
+
+          {% set size = (size_values["size"][0]["value"]|float / 1000 / 1000 / 1000)|round(3) %}
+          
+          {% endif %}
+          {% endif %}
+          
           {% set status_class = "bold-green" %}
           {% endif %}
 
@@ -108,7 +133,18 @@
             <td><a class="{{ status_class }}">{{ dhus_product }}</a></td>
             {% endif %}
             {% if data["metadata"]["show"]["timeliness"] %}
-            <td><a class="{{ status_class }}">{{ time_to_dhus }}</a></td>
+            {% if delta_to_dhus == "N/A" %}
+            <td><a class="{{ status_class }}">{{ delta_to_dhus }}</a></td>
+            {% else %}
+            <td>{{ delta_to_dhus }}</td>
+            {% endif %}
+            {% endif %}
+            {% if data["metadata"]["show"]["volumes"] %}
+            {% if size == "N/A" %}
+            <td><a class="{{ status_class }}">{{ size }}</a></td>
+            {% else %}
+            <td>{{ size }}</td>
+            {% endif %}
             {% endif %}
             <td>{{ datatake_id }}</td>
             {% if planned_imaging %}
@@ -136,6 +172,9 @@
             <th>Product</th>
             {% if data["metadata"]["show"]["timeliness"] %}
             <th>Time to DHUS publication (m)</th>
+            {% endif %}
+            {% if data["metadata"]["show"]["volumes"] %}
+            <th>Size (GB)</th>
             {% endif %}
             <th>Datatake id</th>
             <th>Start</th>
