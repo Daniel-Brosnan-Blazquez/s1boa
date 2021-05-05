@@ -330,22 +330,32 @@ def query_dhus_availability_structure(start_filter, stop_filter, mission, levels
                                         "value": {"op": "like", "filter": mission}
                                     }]
         # end if
-        kwargs["gauge_names"] = {"filter": "PLANNED_IMAGING", "op": "=="}
+        kwargs["gauge_names"] = {"filter": "PLANNED\_IMAGING\_DHUS\_PRODUCT\_COMPLETENESS%", "op": "like"}
+        ####
+        # Query completeness and planned imaging events
+        ####
+        kwargs["link_names"] = {"filter": ["PLANNED_IMAGING"], "op": "in"}
+        dhus_product_completeness_events_with_linked_planned_imaging_events = query.get_linking_events_group_by_link_name(**kwargs)
+        dhus_product_completeness_events = dhus_product_completeness_events_with_linked_planned_imaging_events["prime_events"]
+        planned_imaging_events = dhus_product_completeness_events_with_linked_planned_imaging_events["linking_events"]["PLANNED_IMAGING"]
+
     else:
         kwargs["event_uuids"] = {"filter": planned_imaging_uuid, "op": "=="}
+        ####
+        # Query completeness and planned imaging events
+        ####
+        kwargs["link_names"] = {"filter": ["DHUS_PRODUCT_COMPLETENESS"], "op": "in"}
+        planned_imaging_events_with_linked_dhus_product_completeness_events = query.get_linking_events_group_by_link_name(**kwargs)
+        planned_imaging_events = planned_imaging_events_with_linked_dhus_product_completeness_events["prime_events"]
+        dhus_product_completeness_events = planned_imaging_events_with_linked_dhus_product_completeness_events["linking_events"]["DHUS_PRODUCT_COMPLETENESS"]
+
     # end if
     
-    ####
-    # Query planned imagings
-    ####
-    kwargs["link_names"] = {"filter": ["DHUS_PRODUCT_COMPLETENESS"], "op": "in"}
-    planned_imaging_events = query.get_linking_events_group_by_link_name(**kwargs)
-
     # Build data dictionary
     data = {}
     
     # Export PLANNED_IMAGING events
-    eboa_export.export_events(data, planned_imaging_events["prime_events"], group = "planned_imaging", include_ers = False)
+    eboa_export.export_events(data, planned_imaging_events, group = "planned_imaging", include_ers = False)
 
     if view_content == "completeness":
         include_ers = False
@@ -358,7 +368,7 @@ def query_dhus_availability_structure(start_filter, stop_filter, mission, levels
     dhus_product_completeness_l1_slc = []
     dhus_product_completeness_l1_grd = []
     dhus_product_completeness_l2_ocn = []
-    for event in planned_imaging_events["linking_events"]["DHUS_PRODUCT_COMPLETENESS"]:
+    for event in dhus_product_completeness_events:
         if levels in ["ALL", "L0"] and event.gauge.name == "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L0":
             dhus_product_completeness_l0.append(event)
         elif levels in ["ALL", "L1_SLC"] and event.gauge.name == "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L1_SLC":
