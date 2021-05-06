@@ -100,7 +100,7 @@
           {% if data["metadata"]["show"]["timeliness"] %}
           {% set publication_time_values = annotations["publication_time"]|get_annotations_from_data(data)|first|get_values([{"name": {"filter": "dhus_publication_time","op": "=="}, "group":"publication_time"}]) %}
 
-          {% set delta_to_dhus = (publication_time_values["publication_time"][0]["value"]|date_op(completeness.start, "-") / 60)|round(3) %}
+          {% set delta_to_dhus = (publication_time_values["publication_time"][0]["value"]|date_op(planned_imaging.stop, "-") / 60)|round(3) %}
           
           {% endif %}
           

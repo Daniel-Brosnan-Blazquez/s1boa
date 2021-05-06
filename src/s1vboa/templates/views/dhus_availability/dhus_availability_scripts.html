@@ -8,194 +8,78 @@
 
   {% if data["metadata"]["show"]["timeliness"] %}
 
-  {% if "L0" in parsed_levels[0] and (expected_dhus_products_duration["L0"] - missing_dhus_products_duration["L0"]) > 0 %}
+  {# Timeliness #}
+  {% for level in parsed_levels[0] %}
+  {% if level in parsed_levels[0] and (expected_dhus_products_duration[level] - missing_dhus_products_duration[level]) > 0 %}
 
   var groups = [];
   var items = [];
 
-  vboa.prepare_events_data_for_bar(dhus_availability_data_timeliness["L0"], items, groups);
+  vboa.prepare_events_data_for_bar(dhus_availability_data_timeliness["{{ level }}"], items, groups);
 
   var options = {
-  legend: true,
-  style: "bar",
-  barChart: {width:50, align:'center', sideBySide:true},
-  height: 350,
-  dataAxis: {
-  left: {
-  range: {
-  min: 0
-  },
-  title: {
-  text: "Delta time to DHUS (m)",
-  }
-  }
-  }
+      legend: true,
+      style: "bar",
+      barChart: {width:10,
+                 align:"center",
+                 sideBySide:true},
+      height: 350,
+      dataAxis: {
+          left: {
+              range: {
+                  min: 0
+              },
+              title: {
+                  text: "Delta time to DHUS (m)",
+              }
+          }
+      }
   };
   
-  vboa.display_bar_time("dhus-availability-timeliness-l0", items, groups, options);
+  vboa.display_bar_time("dhus-availability-timeliness-{{ level }}", items, groups, options);
 
-  {% endif %}
-
-  {% if "L1_SLC" in parsed_levels[0] and (expected_dhus_products_duration["L1_SLC"] - missing_dhus_products_duration["L1_SLC"]) > 0 %}
-
-  var groups = [];
-  var items = [];
-
-  vboa.prepare_events_data_for_bar(dhus_availability_data_timeliness["L1_SLC"], items, groups);
-
-  var options = {
-  legend: true,
-  style: "bar",
-  barChart: {width:50, align:'center', sideBySide:true},
-  height: 350,
-  dataAxis: {
-  left: {
-  range: {
-  min: 0
-  },
-  title: {
-  text: "Delta time to DHUS (m)",
-  }
-  }
-  }
-  };
+  {# Statistics #}
+  var min_dom = document.getElementById("summary-dhus-completeness-minimum-delta-to-dhus-{{ level }}");
+  min_dom.innerHTML = vboa.math.min(...dhus_availability_data_timeliness_for_statistics["{{ level }}"]).toFixed(3)
+  var max_dom = document.getElementById("summary-dhus-completeness-maximum-delta-to-dhus-{{ level }}");
+  max_dom.innerHTML = vboa.math.max(...dhus_availability_data_timeliness_for_statistics["{{ level }}"]).toFixed(3)
+  var avg_dom = document.getElementById("summary-dhus-completeness-average-delta-to-dhus-{{ level }}");
+  avg_dom.innerHTML = vboa.math.mean(...dhus_availability_data_timeliness_for_statistics["{{ level }}"]).toFixed(3)
+  var std_dom = document.getElementById("summary-dhus-completeness-std-delta-to-dhus-{{ level }}");
+  std_dom.innerHTML = vboa.math.std(...dhus_availability_data_timeliness_for_statistics["{{ level }}"]).toFixed(3)
   
-  vboa.display_bar_time("dhus-availability-timeliness-l1-slc", items, groups, options);
-
   {% endif %}
-
-  {% if "L1_GRD" in parsed_levels[0] and (expected_dhus_products_duration["L1_GRD"] - missing_dhus_products_duration["L1_GRD"]) > 0 %}
-
-  var groups = [];
-  var items = [];
-
-  vboa.prepare_events_data_for_bar(dhus_availability_data_timeliness["L1_GRD"], items, groups);
-
-  var options = {
-  legend: true,
-  style: "bar",
-  barChart: {width:50, align:'center', sideBySide:true},
-  height: 350,
-  dataAxis: {
-  left: {
-  range: {
-  min: 0
-  },
-  title: {
-  text: "Delta time to DHUS (m)",
-  }
-  }
-  }
-  };
-  
-  vboa.display_bar_time("dhus-availability-timeliness-l1-grd", items, groups, options);
-
-  {% endif %}
-
-  {% if "L2_OCN" in parsed_levels[0] and (expected_dhus_products_duration["L2_OCN"] - missing_dhus_products_duration["L2_OCN"]) > 0 %}
-
-  var groups = [];
-  var items = [];
-
-  vboa.prepare_events_data_for_bar(dhus_availability_data_timeliness["L2_OCN"], items, groups);
-
-  var options = {
-  legend: true,
-  style: "bar",
-  barChart: {width:50, align:'center', sideBySide:true},
-  height: 350,
-  dataAxis: {
-  left: {
-  range: {
-  min: 0
-  },
-  title: {
-  text: "Delta time to DHUS (m)",
-  }
-  }
-  }
-  };
-  
-  vboa.display_bar_time("dhus-availability-timeliness-l2-ocn", items, groups, options);
-
-  {% endif %}
+  {% endfor %}
 
   {% endif %}
   
   {% if data["metadata"]["show"]["completeness"] %}
-  {# Pie L0 completeness #}
-  {% if "L0" in parsed_levels[0] and expected_dhus_products_duration["L0"] > 0 %}
-  l0_completeness = [{{ expected_dhus_products_duration["L0"] - missing_dhus_products_duration["L0"] }}, {{ missing_dhus_products_duration["L0"] }}]
-  l0_completeness_background_color = ["green", "darkred"]
-  l0_completeness_labels = ["L0 available in DHUS", "L0 missing in DHUS"]
+
+  {# Pie completeness #}
+  {% for level in parsed_levels[0] %}
+  {% if level in parsed_levels[0] and expected_dhus_products_duration[level] > 0 %}
+  var completeness = [{{ expected_dhus_products_duration[level] - missing_dhus_products_duration[level] }}, {{ missing_dhus_products_duration[level] }}]
+  var completeness_background_color = ["green", "darkred"]
+  var completeness_labels = ["{{ level }} available in DHUS", "{{ level }} missing in DHUS"]
 
   var data = {
   datasets: [{
-  data: l0_completeness,
-  backgroundColor: l0_completeness_background_color
+  data: completeness,
+  backgroundColor: completeness_background_color
   }],
-  labels: l0_completeness_labels
+  labels: completeness_labels
   }
   
-  vboa.display_pie("dhus-availability-pie-l0-completeness", data)
+  vboa.display_pie("dhus-availability-pie-{{ level }}-completeness", data)
   {% endif %}
-
-  {# Pie L1_SLC completeness #}
-  {% if "L1_SLC" in parsed_levels[0] and expected_dhus_products_duration["L1_SLC"] > 0 %}
-  l1_slc_completeness = [{{ expected_dhus_products_duration["L1_SLC"] - missing_dhus_products_duration["L1_SLC"] }}, {{ missing_dhus_products_duration["L1_SLC"] }}]
-  l1_slc_completeness_background_color = ["green", "darkred"]
-  l1_slc_completeness_labels = ["L1_SLC available in DHUS", "L1_SLC missing in DHUS"]
-
-  var data = {
-  datasets: [{
-  data: l1_slc_completeness,
-  backgroundColor: l1_slc_completeness_background_color
-  }],
-  labels: l1_slc_completeness_labels
-  }
-  
-  vboa.display_pie("dhus-availability-pie-l1-slc-completeness", data)
-  {% endif %}
-
-  {# Pie L1_GRD completeness #}
-  {% if "L1_GRD" in parsed_levels[0] and expected_dhus_products_duration["L1_GRD"] > 0 %}
-  l1_grd_completeness = [{{ expected_dhus_products_duration["L1_GRD"] - missing_dhus_products_duration["L1_GRD"] }}, {{ missing_dhus_products_duration["L1_GRD"] }}]
-  l1_grd_completeness_background_color = ["green", "darkred"]
-  l1_grd_completeness_labels = ["L1_GRD available in DHUS", "L1_GRD missing in DHUS"]
-
-  var data = {
-  datasets: [{
-  data: l1_grd_completeness,
-  backgroundColor: l1_grd_completeness_background_color
-  }],
-  labels: l1_grd_completeness_labels
-  }
-  
-  vboa.display_pie("dhus-availability-pie-l1-grd-completeness", data)
-  {% endif %}
-
-  {# Pie L2_OCN completeness #}
-  {% if "L2_OCN" in parsed_levels[0] and expected_dhus_products_duration["L2_OCN"] > 0 %}
-  l2_ocn_completeness = [{{ expected_dhus_products_duration["L2_OCN"] - missing_dhus_products_duration["L2_OCN"] }}, {{ missing_dhus_products_duration["L2_OCN"] }}]
-  l2_ocn_completeness_background_color = ["green", "darkred"]
-  l2_ocn_completeness_labels = ["L2_OCN available in DHUS", "L2_OCN missing in DHUS"]
-
-  var data = {
-  datasets: [{
-  data: l2_ocn_completeness,
-  backgroundColor: l2_ocn_completeness_background_color
-  }],
-  labels: l2_ocn_completeness_labels
-  }
-  
-  vboa.display_pie("dhus-availability-pie-l2-ocn-completeness", data)
-  {% endif %}
+  {% endfor %}
 
   var groups = [];
   var items = [];
 
   vboa.prepare_events_data_for_timeline(dhus_availability_data_timeline, items, groups);
   vboa.display_timeline("dhus-availability-timeline", items, groups);
+
   {% endif %}
   
   {% if sliding_window %}

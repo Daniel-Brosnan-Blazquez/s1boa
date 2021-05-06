@@ -4,7 +4,7 @@
 {% set parsed_levels = [["L0", "L1_SLC", "L1_GRD", "L2_OCN"]] %}
 {% if data["metadata"]["levels"] != "ALL" %}
 {% do parsed_levels.pop() %}
-{% do parsed_levels.append(data["metadata"]["levels"]) %}
+{% do parsed_levels.append([data["metadata"]["levels"]]) %}
 {% endif %}
 
 <!-- 
@@ -13,44 +13,32 @@ Group of events
 <!-- Planned imaging -->
 {% set planned_imaging_events = data|get_events_json(data["event_groups"]["planned_imaging"]) %}
 
-<!-- Completeness L0 -->
-{% set dhus_product_completeness_l0_events = data|get_events_json(data["event_groups"]["dhus_product_completeness_l0"]) %}
-<!-- Completeness L1_SLC -->
-{% set dhus_product_completeness_l1_slc_events = data|get_events_json(data["event_groups"]["dhus_product_completeness_l1_slc"]) %}
-<!-- Completeness L1_GRD -->
-{% set dhus_product_completeness_l1_grd_events = data|get_events_json(data["event_groups"]["dhus_product_completeness_l1_grd"]) %}
-<!-- Completeness L2_OCN -->
-{% set dhus_product_completeness_l2_ocn_events = data|get_events_json(data["event_groups"]["dhus_product_completeness_l2_ocn"]) %}
+<!-- Completeness events -->
+{% set dhus_product_completeness_events = {} %}
+{% set list_of_lists_products_completeness = [[]] %}
+{% for level in parsed_levels[0] %}
+{% do dhus_product_completeness_events.update({level: data|get_events_json(data["event_groups"]["dhus_product_completeness_" + level])}) %}
+{% do list_of_lists_products_completeness.append(dhus_product_completeness_events[level]["events"]) %}
+{% endfor %}
+{% set list_products_completeness = list_of_lists_products_completeness|flatten %}
 
-<!-- Completeness ALL -->
-{% set list_products_completeness = dhus_product_completeness_l0_events["events"] + dhus_product_completeness_l1_slc_events["events"] + dhus_product_completeness_l1_grd_events["events"] + dhus_product_completeness_l2_ocn_events["events"] %}
-
-<!-- Completeness -->
+<!-- Completeness characterization -->
 <!-- Expected acquired MSI duration from planning -->
 {% set expected_acquisition_duration = ((data|get_timeline_duration_from_data_json(data["event_groups"]["planned_imaging"])) / 60)|round(3) %}
 
 <!-- Expected DHUS products duration -->
 {% set expected_dhus_products_duration = {} %}
-{% do expected_dhus_products_duration.update({"L0": ((data|get_timeline_duration_from_data_json(data["event_groups"]["dhus_product_completeness_l0"])) / 60)|round(3)}) %}
-{% do expected_dhus_products_duration.update({"L1_SLC": ((data|get_timeline_duration_from_data_json(data["event_groups"]["dhus_product_completeness_l1_slc"])) / 60)|round(3)}) %}
-{% do expected_dhus_products_duration.update({"L1_GRD": ((data|get_timeline_duration_from_data_json(data["event_groups"]["dhus_product_completeness_l1_grd"])) / 60)|round(3)}) %}
-{% do expected_dhus_products_duration.update({"L2_OCN": ((data|get_timeline_duration_from_data_json(data["event_groups"]["dhus_product_completeness_l2_ocn"])) / 60)|round(3)}) %}
+{% for level in parsed_levels[0] %}
+{% do expected_dhus_products_duration.update({level: ((data|get_timeline_duration_from_data_json(data["event_groups"]["dhus_product_completeness_" + level])) / 60)|round(3)}) %}
+{% endfor %}
 
 <!-- Missing processing duration -->
 {% set missing_dhus_products = {} %}
 {% set missing_dhus_products_duration = {} %}
-<!-- L0 -->
-{% do missing_dhus_products.update({"L0": dhus_product_completeness_l0_events["events"]|get_events_filtered_by_values([{"name": {"filter": "status", "op": "=="}, "value": {"filter": "MISSING", "op": "=="}}])}) %}
-{% do missing_dhus_products_duration.update({"L0": ((missing_dhus_products["L0"]|get_timeline_duration_from_events_json / 60))|round(3)}) %}
-<!-- L1_SLC -->
-{% do missing_dhus_products.update({"L1_SLC": dhus_product_completeness_l1_slc_events["events"]|get_events_filtered_by_values([{"name": {"filter": "status", "op": "=="}, "value": {"filter": "MISSING", "op": "=="}}])}) %}
-{% do missing_dhus_products_duration.update({"L1_SLC": ((missing_dhus_products["L1_SLC"]|get_timeline_duration_from_events_json / 60))|round(3)}) %}
-<!-- L1_GRD -->
-{% do missing_dhus_products.update({"L1_GRD": dhus_product_completeness_l1_grd_events["events"]|get_events_filtered_by_values([{"name": {"filter": "status", "op": "=="}, "value": {"filter": "MISSING", "op": "=="}}])}) %}
-{% do missing_dhus_products_duration.update({"L1_GRD": ((missing_dhus_products["L1_GRD"]|get_timeline_duration_from_events_json / 60))|round(3)}) %}
-<!-- L2_OCN -->
-{% do missing_dhus_products.update({"L2_OCN": dhus_product_completeness_l2_ocn_events["events"]|get_events_filtered_by_values([{"name": {"filter": "status", "op": "=="}, "value": {"filter": "MISSING", "op": "=="}}])}) %}
-{% do missing_dhus_products_duration.update({"L2_OCN": ((missing_dhus_products["L2_OCN"]|get_timeline_duration_from_events_json / 60))|round(3)}) %}
+{% for level in parsed_levels[0] %}
+{% do missing_dhus_products.update({level: dhus_product_completeness_events[level]["events"]|get_events_filtered_by_values([{"name": {"filter": "status", "op": "=="}, "value": {"filter": "MISSING", "op": "=="}}])}) %}
+{% do missing_dhus_products_duration.update({level: ((missing_dhus_products[level]|get_timeline_duration_from_events_json / 60))|round(3)}) %}
+{% endfor %}
 
 <!-- Complete route with the view content -->
 {% if data["metadata"]["view_content"] == "completeness" %}
@@ -78,5 +66,7 @@ Group of events
 
 {% block scripts %}
 {{ super() }}
+
 {% include "views/dhus_availability/dhus_availability_scripts.html" %}
+
 {% endblock %}

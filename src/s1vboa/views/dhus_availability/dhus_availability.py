@@ -382,22 +382,22 @@ def query_dhus_availability_structure(start_filter, stop_filter, mission, levels
 
     # Export DHUS_PRODUCT_COMPLETENESS events for L0
     if levels in ["ALL", "L0"]:
-        eboa_export.export_events(data, dhus_product_completeness_l0, group = "dhus_product_completeness_l0", include_ers = include_ers)
+        eboa_export.export_events(data, dhus_product_completeness_l0, group = "dhus_product_completeness_L0", include_ers = include_ers)
     # end if
     
     # Export DHUS_PRODUCT_COMPLETENESS events for L1 SLC
     if levels in ["ALL", "L1_SLC"]:
-        eboa_export.export_events(data, dhus_product_completeness_l1_slc, group = "dhus_product_completeness_l1_slc", include_ers = include_ers)
+        eboa_export.export_events(data, dhus_product_completeness_l1_slc, group = "dhus_product_completeness_L1_SLC", include_ers = include_ers)
     # end if
 
     # Export DHUS_PRODUCT_COMPLETENESS events for L1 GRD
     if levels in ["ALL", "L1_GRD"]:
-        eboa_export.export_events(data, dhus_product_completeness_l1_grd, group = "dhus_product_completeness_l1_grd", include_ers = include_ers)
+        eboa_export.export_events(data, dhus_product_completeness_l1_grd, group = "dhus_product_completeness_L1_GRD", include_ers = include_ers)
     # end if
 
     # Export DHUS_PRODUCT_COMPLETENESS events for L2 OCN
     if levels in ["ALL", "L2_OCN"]:
-        eboa_export.export_events(data, dhus_product_completeness_l2_ocn, group = "dhus_product_completeness_l2_ocn", include_ers = include_ers)
+        eboa_export.export_events(data, dhus_product_completeness_l2_ocn, group = "dhus_product_completeness_L2_OCN", include_ers = include_ers)
     # end if
 
     return data

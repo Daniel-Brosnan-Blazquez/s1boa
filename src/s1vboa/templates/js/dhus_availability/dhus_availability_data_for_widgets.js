@@ -1,5 +1,6 @@
 var dhus_availability_data_timeline = []
 var dhus_availability_data_timeliness = {}
+var dhus_availability_data_timeliness_for_statistics = {}
 
 {% for completeness in list_products_completeness %}
 
@@ -73,7 +74,7 @@ var dhus_availability_data_timeliness = {}
 
 {% set publication_time_values = annotations["publication_time"]|get_annotations_from_data(data)|first|get_values([{"name": {"filter": "dhus_publication_time","op": "=="}, "group":"publication_time"}]) %}
 
-{% set delta_to_dhus = (publication_time_values["publication_time"][0]["value"]|date_op(completeness.start, "-") / 60)|round(3) %}
+{% set delta_to_dhus = (publication_time_values["publication_time"][0]["value"]|date_op(planned_imaging.stop, "-") / 60)|round(3) %}
 
 {% set delta_to_dhus_for_tooltip = delta_to_dhus %}
 
@@ -124,6 +125,10 @@ dhus_availability_data_timeliness["{{ level }}"].push({
     "tooltip": create_dhus_availability_tooltip("{{ level }}", "{{ satellite }}", "{{ orbit_for_tooltip }}", "{{ completeness.start }}", "{{ completeness.stop }}", "{{ (completeness.duration / 60)|round(3) }}", "{{ status_for_tooltip }}", "{{ dhus_product_for_tooltip }}", "{{ delta_to_dhus_for_tooltip }}", "{{ size_for_tooltip }}", "{{ datatake_id }}", "{{ planned_imaging.start }}", "{{ planned_imaging.stop }}", "{{ (planned_imaging.duration / 60)|round(3) }}"),
     "className": "{{ class_name }}"
 })
+if (!("{{ level }}" in dhus_availability_data_timeliness_for_statistics)){
+    dhus_availability_data_timeliness_for_statistics["{{ level }}"] = []
+}
+dhus_availability_data_timeliness_for_statistics["{{ level }}"].push({{ delta_to_dhus }})
 {% endif %}
 
 {% endfor %}
