@@ -1,4 +1,4 @@
-{% if ("L0" in parsed_levels[0] and (expected_dhus_products_duration["L0"] - missing_dhus_products_duration["L0"]) > 0) or ("L1_SLC" in parsed_levels[0] and (expected_dhus_products_duration["L1_SLC"] - missing_dhus_products_duration["L1_SLC"]) > 0) or ("L1_GRD" in parsed_levels[0] and (expected_dhus_products_duration["L1_GRD"] - missing_dhus_products_duration["L1_GRD"]) > 0) or ("L2_OCN" in parsed_levels[0] and (expected_dhus_products_duration["L2_OCN"] - missing_dhus_products_duration["L2_OCN"]) > 0) %}
+{% if ("L0" in parsed_levels[0] and (expected_generated_dhus_products_duration["L0"] > 0 or unexpected_dhus_products_duration["L0"] > 0)) or ("L1_SLC" in parsed_levels[0] and (expected_generated_dhus_products_duration["L1_SLC"] > 0 or unexpected_dhus_products_duration["L1_SLC"] > 0)) or ("L1_GRD" in parsed_levels[0] and (expected_generated_dhus_products_duration["L1_GRD"] > 0 or unexpected_dhus_products_duration["L1_GRD"] > 0)) or ("L2_OCN" in parsed_levels[0] and (expected_generated_dhus_products_duration["L2_OCN"] > 0 or unexpected_dhus_products_duration["L2_OCN"] > 0)) %}
 <div class="row">
   <div class="panel panel-default">
     <div class="panel-heading">
@@ -14,7 +14,7 @@
         <div class="row">
           <!-- Timeliness -->
           {% for level in parsed_levels[0] %}
-          {% if level in parsed_levels[0] and (expected_dhus_products_duration[level] - missing_dhus_products_duration[level]) > 0 %}
+          {% if level in parsed_levels[0] and (expected_generated_dhus_products_duration[level] > 0 or unexpected_dhus_products_duration[level] > 0) %}
           <div class="col-xs-6">
             <div class="panel panel-primary">
               <div class="panel-heading" align="center" style="font-size: 20px">{{ level }} availability in DHUS timeliness</div>

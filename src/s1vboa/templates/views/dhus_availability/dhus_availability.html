@@ -25,15 +25,23 @@ Group of events
 <!-- Expected DHUS products duration -->
 {% set expected_dhus_products_duration = {} %}
 {% for level in parsed_levels[0] %}
-{% do expected_dhus_products_duration.update({level: ((data|get_timeline_duration_from_data_json(data["event_groups"]["dhus_product_completeness_" + level])) / 60)|round(3)}) %}
+{% do expected_dhus_products_duration.update({level: ((dhus_product_completeness_events[level]["events"]|get_events_filtered_by_values([{"name": {"filter": "status", "op": "=="}, "value": {"filter": "UNEXPECTED", "op": "!="}}])|get_timeline_duration_from_events_json) / 60)}) %}
+{% endfor %}
+
+<!-- Unexpected DHUS products duration -->
+{% set unexpected_dhus_products_duration = {} %}
+{% for level in parsed_levels[0] %}
+{% do unexpected_dhus_products_duration.update({level: ((dhus_product_completeness_events[level]["events"]|get_events_filtered_by_values([{"name": {"filter": "status", "op": "=="}, "value": {"filter": "UNEXPECTED", "op": "=="}}])|get_timeline_duration_from_events_json) / 60)}) %}
 {% endfor %}
 
 <!-- Missing processing duration -->
 {% set missing_dhus_products = {} %}
 {% set missing_dhus_products_duration = {} %}
+{% set expected_generated_dhus_products_duration = {} %}
 {% for level in parsed_levels[0] %}
 {% do missing_dhus_products.update({level: dhus_product_completeness_events[level]["events"]|get_events_filtered_by_values([{"name": {"filter": "status", "op": "=="}, "value": {"filter": "MISSING", "op": "=="}}])}) %}
-{% do missing_dhus_products_duration.update({level: ((missing_dhus_products[level]|get_timeline_duration_from_events_json / 60))|round(3)}) %}
+{% do missing_dhus_products_duration.update({level: ((missing_dhus_products[level]|get_timeline_duration_from_events_json / 60))}) %}
+{% do expected_generated_dhus_products_duration.update({level: (expected_dhus_products_duration[level] - missing_dhus_products_duration[level])}) %}
 {% endfor %}
 
 <!-- Complete route with the view content -->
