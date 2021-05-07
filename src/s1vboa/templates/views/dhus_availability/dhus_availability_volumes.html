@@ -1,0 +1,31 @@
+{% if ("L0" in parsed_levels[0] and (expected_dhus_products_duration["L0"] - missing_dhus_products_duration["L0"]) > 0) or ("L1_SLC" in parsed_levels[0] and (expected_dhus_products_duration["L1_SLC"] - missing_dhus_products_duration["L1_SLC"]) > 0) or ("L1_GRD" in parsed_levels[0] and (expected_dhus_products_duration["L1_GRD"] - missing_dhus_products_duration["L1_GRD"]) > 0) or ("L2_OCN" in parsed_levels[0] and (expected_dhus_products_duration["L2_OCN"] - missing_dhus_products_duration["L2_OCN"]) > 0) %}
+<div class="row">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#dhus-availability-volumes-section">Evolution of the data volumes in DHUS<span class="fa fa-angle-double-down"></span></a>
+      </h3>
+    </div>
+    <!-- /.panel-heading -->
+    <div class="panel-body panel-collapse collapse in" id="dhus-availability-volumes-section">
+        <p>
+          <b>The following graph/s show/s the evolution of the data volumes in DHUS per selected level/s:</b>
+        </p>
+        <div class="row">
+          <!-- Data volumes -->
+          {% for level in parsed_levels[0] %}
+          {% if level in parsed_levels[0] and (expected_dhus_products_duration[level] - missing_dhus_products_duration[level]) > 0 %}
+          <div class="col-xs-6">
+            <div class="panel panel-primary">
+              <div class="panel-heading" align="center" style="font-size: 20px">Evolution of the {{ level }} data volumes in DHUS</div>
+              <div align="center">Total (GB): <div id="summary-dhus-volumes-total-{{ level }}" style="display:inline; font-weight: bold"></div>, Average (GB): <div id="summary-dhus-volumes-average-{{ level }}" style="display:inline; font-weight: bold"></div>, Minimum (GB): <div id="summary-dhus-volumes-minimum-{{ level }}" style="display:inline; font-weight: bold"></div>, Maximum(GB): <div id="summary-dhus-volumes-maximum-{{ level }}" style="display:inline; font-weight: bold"></div>, Standard deviation (GB): <div id="summary-dhus-volumes-std-{{ level }}" style="display:inline; font-weight: bold"></div></div>
+              <div class="panel-body" align="center" id="dhus-availability-volumes-{{ level }}"></div>
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+    </div>
+  </div>
+</div>
+{% endif %}

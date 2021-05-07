@@ -1,6 +1,6 @@
 <script type="text/javascript">
 
-  {% if data["event_groups"]["planned_imaging"]|length > 0 %}
+  {% if list_products_completeness|length > 0 %}
 
   {% include "js/dhus_availability/dhus_availability_functions.js" %}
   
@@ -39,14 +39,14 @@
   vboa.display_bar_time("dhus-availability-timeliness-{{ level }}", items, groups, options);
 
   {# Statistics #}
-  var min_dom = document.getElementById("summary-dhus-completeness-minimum-delta-to-dhus-{{ level }}");
-  min_dom.innerHTML = vboa.math.min(...dhus_availability_data_timeliness_for_statistics["{{ level }}"]).toFixed(3)
-  var max_dom = document.getElementById("summary-dhus-completeness-maximum-delta-to-dhus-{{ level }}");
-  max_dom.innerHTML = vboa.math.max(...dhus_availability_data_timeliness_for_statistics["{{ level }}"]).toFixed(3)
-  var avg_dom = document.getElementById("summary-dhus-completeness-average-delta-to-dhus-{{ level }}");
-  avg_dom.innerHTML = vboa.math.mean(...dhus_availability_data_timeliness_for_statistics["{{ level }}"]).toFixed(3)
-  var std_dom = document.getElementById("summary-dhus-completeness-std-delta-to-dhus-{{ level }}");
-  std_dom.innerHTML = vboa.math.std(...dhus_availability_data_timeliness_for_statistics["{{ level }}"]).toFixed(3)
+  var min_dom = document.getElementById("summary-dhus-timeliness-minimum-delta-to-dhus-{{ level }}");
+  min_dom.innerHTML = vboa.math.min(...dhus_availability_data_timeliness_for_statistics["{{ level }}"]).toFixed(3);
+  var max_dom = document.getElementById("summary-dhus-timeliness-maximum-delta-to-dhus-{{ level }}");
+  max_dom.innerHTML = vboa.math.max(...dhus_availability_data_timeliness_for_statistics["{{ level }}"]).toFixed(3);
+  var avg_dom = document.getElementById("summary-dhus-timeliness-average-delta-to-dhus-{{ level }}");
+  avg_dom.innerHTML = vboa.math.mean(...dhus_availability_data_timeliness_for_statistics["{{ level }}"]).toFixed(3);
+  var std_dom = document.getElementById("summary-dhus-timeliness-std-delta-to-dhus-{{ level }}");
+  std_dom.innerHTML = vboa.math.std(...dhus_availability_data_timeliness_for_statistics["{{ level }}"]).toFixed(3);
   
   {% endif %}
   {% endfor %}
@@ -80,6 +80,61 @@
   vboa.prepare_events_data_for_timeline(dhus_availability_data_timeline, items, groups);
   vboa.display_timeline("dhus-availability-timeline", items, groups);
 
+  {% endif %}
+
+  {% if data["metadata"]["show"]["volumes"] %}
+  {% if ("L0" in parsed_levels[0] and (expected_dhus_products_duration["L0"] - missing_dhus_products_duration["L0"]) > 0) or ("L1_SLC" in parsed_levels[0] and (expected_dhus_products_duration["L1_SLC"] - missing_dhus_products_duration["L1_SLC"]) > 0) or ("L1_GRD" in parsed_levels[0] and (expected_dhus_products_duration["L1_GRD"] - missing_dhus_products_duration["L1_GRD"]) > 0) or ("L2_OCN" in parsed_levels[0] and (expected_dhus_products_duration["L2_OCN"] - missing_dhus_products_duration["L2_OCN"]) > 0) %}
+  
+  var volumes = []
+  var volumes_labels = []
+  var volumes_background_color = []
+  var default_background_color = {
+      "L0": "darkblue",
+      "L1_SLC": "gold",
+      "L1_GRD": "darkmagenta",
+      "L2_OCN": "darkgreen",
+  }
+
+  {# XY graphs #}
+  {% for level in parsed_levels[0] %}
+  {% if level in parsed_levels[0] and (expected_dhus_products_duration[level] - missing_dhus_products_duration[level]) > 0 %}
+
+  {# Statistics #}
+  var total_dom = document.getElementById("summary-dhus-volumes-total-{{ level }}");
+  var total_value = vboa.math.sum(...dhus_availability_data_volumes_for_statistics["{{ level }}"]).toFixed(3);
+  total_dom.innerHTML = total_value;
+  volumes.push(total_value)
+  volumes_labels.push("{{ level }} total (GB) available in DHUS")
+  volumes_background_color.push(default_background_color["{{ level }}"])
+  var min_dom = document.getElementById("summary-dhus-volumes-minimum-{{ level }}");
+  min_dom.innerHTML = vboa.math.min(...dhus_availability_data_volumes_for_statistics["{{ level }}"]).toFixed(3);
+  var max_dom = document.getElementById("summary-dhus-volumes-maximum-{{ level }}");
+  max_dom.innerHTML = vboa.math.max(...dhus_availability_data_volumes_for_statistics["{{ level }}"]).toFixed(3);
+  var avg_dom = document.getElementById("summary-dhus-volumes-average-{{ level }}");
+  avg_dom.innerHTML = vboa.math.mean(...dhus_availability_data_volumes_for_statistics["{{ level }}"]).toFixed(3);
+  var std_dom = document.getElementById("summary-dhus-volumes-std-{{ level }}");
+  std_dom.innerHTML = vboa.math.std(...dhus_availability_data_volumes_for_statistics["{{ level }}"]).toFixed(3);
+
+  var groups = [];
+  var items = [];
+  var options = vboa.prepare_events_data_for_xy(dhus_availability_data_volumes["{{ level }}"], items, groups, "Data volume evolution (GB)");
+  vboa.display_x_time("dhus-availability-volumes-{{ level }}", items, groups, options);
+  
+  {% endif %}
+  {% endfor %}
+
+  {# Pie #}
+  var data = {
+      datasets: [{
+          data: volumes,
+          backgroundColor: volumes_background_color
+      }],
+      labels: volumes_labels
+  }
+  
+  vboa.display_pie("dhus-availability-pie-volumes", data)
+
+  {% endif %}
   {% endif %}
   
   {% if sliding_window %}

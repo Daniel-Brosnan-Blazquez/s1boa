@@ -1,8 +1,10 @@
 var dhus_availability_data_timeline = []
 var dhus_availability_data_timeliness = {}
 var dhus_availability_data_timeliness_for_statistics = {}
+var dhus_availability_data_volumes = {}
+var dhus_availability_data_volumes_for_statistics = {}
 
-{% for completeness in list_products_completeness %}
+{% for completeness in list_products_completeness|sort(attribute="start") %}
 
 {# Obtain planned imaging #}
 {% set planned_imaging = completeness|get_linking_event("PLANNED_IMAGING", data) %}
@@ -55,15 +57,15 @@ var dhus_availability_data_timeliness_for_statistics = {}
 {% set class_name = "fill-border-red" %}
 {% set status_class = "bold-red" %}
 
-{% elif status == "UNEXPECTED" %}
-
-{% set class_name = "fill-border-blue" %}
-{% set status_class = "bold-blue" %}
-
 {% else %}
 
+{% if status == "UNEXPECTED" %}
+{% set class_name = "fill-border-blue" %}
+{% set status_class = "bold-blue" %}
+{% else %}
 {% set class_name = "fill-border-green" %}
 {% set status_class = "bold-green" %}
+{% endif %}
 
 {% if data["metadata"]["show"]["timeliness"] or data["metadata"]["show"]["volumes"] %}
 {% set er = data["explicit_references"][completeness["explicit_reference"]["uuid"]] %}
@@ -74,7 +76,11 @@ var dhus_availability_data_timeliness_for_statistics = {}
 
 {% set publication_time_values = annotations["publication_time"]|get_annotations_from_data(data)|first|get_values([{"name": {"filter": "dhus_publication_time","op": "=="}, "group":"publication_time"}]) %}
 
+{% if planned_imaging %}
 {% set delta_to_dhus = (publication_time_values["publication_time"][0]["value"]|date_op(planned_imaging.stop, "-") / 60)|round(3) %}
+{% else %}
+{% set delta_to_dhus = (publication_time_values["publication_time"][0]["value"]|date_op(completeness.stop, "-") / 60)|round(3) %}
+{% endif %}
 
 {% set delta_to_dhus_for_tooltip = delta_to_dhus %}
 
@@ -93,12 +99,26 @@ var dhus_availability_data_timeliness_for_statistics = {}
 
 {% endif %}
 
+{% if planned_imaging %}
 {% set status_for_tooltip = "<a class='" + status_class + "' href='/views/dhus-availability-by-datatake/" + planned_imaging.event_uuid + "'>" + status + "</a>" %}
+{% else %}
+{% set status_for_tooltip = "<a class='" + status_class + "'>" + status + "</a>" %}
+{% endif %}
 
 {% if dhus_product != "N/A" %}
 {% set dhus_product_for_tooltip = "<a href='/eboa_nav/query-event-links/" + completeness.event_uuid + "'>" + dhus_product + "</a>" %}
 {% else %}
 {% set dhus_product_for_tooltip = "<a class='" + status_class + "'>" + dhus_product + "</a>" %}
+{% endif %}
+
+{% if planned_imaging %}
+{% set planned_imaging_start = planned_imaging.start %}
+{% set planned_imaging_stop = planned_imaging.stop %}
+{% set planned_imaging_duration = (planned_imaging.duration / 60)|round(3) %}
+{% else %}
+{% set planned_imaging_start = "N/A" %}
+{% set planned_imaging_stop = "N/A" %}
+{% set planned_imaging_duration = "N/A" %}
 {% endif %}
 
 {% if data["metadata"]["show"]["completeness"] %}
@@ -108,7 +128,7 @@ dhus_availability_data_timeline.push({
     "timeline": "{{ level }}",
     "start": "{{ completeness['start'] }}",
     "stop": "{{ completeness['stop'] }}",
-    "tooltip": create_dhus_availability_tooltip("{{ level }}", "{{ satellite }}", "{{ orbit_for_tooltip }}", "{{ completeness.start }}", "{{ completeness.stop }}", "{{ (completeness.duration / 60)|round(3) }}", "{{ status_for_tooltip }}", "{{ dhus_product_for_tooltip }}", "{{ delta_to_dhus_for_tooltip }}", "{{ size_for_tooltip }}", "{{ datatake_id }}", "{{ planned_imaging.start }}", "{{ planned_imaging.stop }}", "{{ (planned_imaging.duration / 60)|round(3) }}"),
+    "tooltip": create_dhus_availability_tooltip("{{ level }}", "{{ satellite }}", "{{ orbit_for_tooltip }}", "{{ completeness.start }}", "{{ completeness.stop }}", "{{ (completeness.duration / 60)|round(3) }}", "{{ status_for_tooltip }}", "{{ dhus_product_for_tooltip }}", "{{ delta_to_dhus_for_tooltip }}", "{{ size_for_tooltip }}", "{{ datatake_id }}", "{{ planned_imaging_start }}", "{{ planned_imaging_stop }}", "{{ planned_imaging_duration }}"),
     "className": "{{ class_name }}"
 })
 {% endif %}
@@ -122,7 +142,7 @@ dhus_availability_data_timeliness["{{ level }}"].push({
     "group": "{{ satellite }}",
     "x": "{{ completeness.start }}",
     "y": "{{ delta_to_dhus }}",
-    "tooltip": create_dhus_availability_tooltip("{{ level }}", "{{ satellite }}", "{{ orbit_for_tooltip }}", "{{ completeness.start }}", "{{ completeness.stop }}", "{{ (completeness.duration / 60)|round(3) }}", "{{ status_for_tooltip }}", "{{ dhus_product_for_tooltip }}", "{{ delta_to_dhus_for_tooltip }}", "{{ size_for_tooltip }}", "{{ datatake_id }}", "{{ planned_imaging.start }}", "{{ planned_imaging.stop }}", "{{ (planned_imaging.duration / 60)|round(3) }}"),
+    "tooltip": create_dhus_availability_tooltip("{{ level }}", "{{ satellite }}", "{{ orbit_for_tooltip }}", "{{ completeness.start }}", "{{ completeness.stop }}", "{{ (completeness.duration / 60)|round(3) }}", "{{ status_for_tooltip }}", "{{ dhus_product_for_tooltip }}", "{{ delta_to_dhus_for_tooltip }}", "{{ size_for_tooltip }}", "{{ datatake_id }}", "{{ planned_imaging_start }}", "{{ planned_imaging_stop }}", "{{ planned_imaging_duration }}"),
     "className": "{{ class_name }}"
 })
 if (!("{{ level }}" in dhus_availability_data_timeliness_for_statistics)){
@@ -130,5 +150,24 @@ if (!("{{ level }}" in dhus_availability_data_timeliness_for_statistics)){
 }
 dhus_availability_data_timeliness_for_statistics["{{ level }}"].push({{ delta_to_dhus }})
 {% endif %}
+
+{% if data["metadata"]["show"]["volumes"] %}
+if (!("{{ level }}" in dhus_availability_data_volumes_for_statistics)){
+    dhus_availability_data_volumes_for_statistics["{{ level }}"] = []
+}
+dhus_availability_data_volumes_for_statistics["{{ level }}"].push({{ size }})
+{% endif %}
+
+if (!("{{ level }}" in dhus_availability_data_volumes)){
+    dhus_availability_data_volumes["{{ level }}"] = []
+}
+dhus_availability_data_volumes["{{ level }}"].push({
+    "id": "{{ completeness.event_uuid }}",
+    "group": "{{ satellite }}",
+    "x": "{{ completeness.start }}",
+    "y": vboa.math.sum(dhus_availability_data_volumes_for_statistics["{{ level }}"]),
+    "tooltip": create_dhus_availability_tooltip("{{ level }}", "{{ satellite }}", "{{ orbit_for_tooltip }}", "{{ completeness.start }}", "{{ completeness.stop }}", "{{ (completeness.duration / 60)|round(3) }}", "{{ status_for_tooltip }}", "{{ dhus_product_for_tooltip }}", "{{ delta_to_dhus_for_tooltip }}", "{{ size_for_tooltip }}", "{{ datatake_id }}", "{{ planned_imaging_start }}", "{{ planned_imaging_stop }}", "{{ planned_imaging_duration }}"),
+    "className": "{{ class_name }}"
+})
 
 {% endfor %}

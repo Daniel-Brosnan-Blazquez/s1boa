@@ -1,3 +1,4 @@
+{% if ("L0" in parsed_levels[0] and (expected_dhus_products_duration["L0"] - missing_dhus_products_duration["L0"]) > 0) or ("L1_SLC" in parsed_levels[0] and (expected_dhus_products_duration["L1_SLC"] - missing_dhus_products_duration["L1_SLC"]) > 0) or ("L1_GRD" in parsed_levels[0] and (expected_dhus_products_duration["L1_GRD"] - missing_dhus_products_duration["L1_GRD"]) > 0) or ("L2_OCN" in parsed_levels[0] and (expected_dhus_products_duration["L2_OCN"] - missing_dhus_products_duration["L2_OCN"]) > 0) %}
 <div class="row">
   <div class="panel panel-default">
     <div class="panel-heading">
@@ -17,6 +18,7 @@
           <div class="col-xs-6">
             <div class="panel panel-primary">
               <div class="panel-heading" align="center" style="font-size: 20px">{{ level }} availability in DHUS timeliness</div>
+              <div align="center">Average (m): <div id="summary-dhus-timeliness-average-delta-to-dhus-{{ level }}" style="display:inline; font-weight: bold"></div>, Minimum (m): <div id="summary-dhus-timeliness-minimum-delta-to-dhus-{{ level }}" style="display:inline; font-weight: bold"></div>, Maximum(m): <div id="summary-dhus-timeliness-maximum-delta-to-dhus-{{ level }}" style="display:inline; font-weight: bold"></div>, Standard deviation (m): <div id="summary-dhus-timeliness-std-delta-to-dhus-{{ level }}" style="display:inline; font-weight: bold"></div></div>
               <div class="panel-body" align="center" id="dhus-availability-timeliness-{{ level }}"></div>
             </div>
           </div>
@@ -26,3 +28,4 @@
     </div>
   </div>
 </div>
+{% endif %}

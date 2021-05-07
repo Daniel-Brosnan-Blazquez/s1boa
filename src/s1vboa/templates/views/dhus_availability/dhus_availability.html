@@ -22,10 +22,6 @@ Group of events
 {% endfor %}
 {% set list_products_completeness = list_of_lists_products_completeness|flatten %}
 
-<!-- Completeness characterization -->
-<!-- Expected acquired MSI duration from planning -->
-{% set expected_acquisition_duration = ((data|get_timeline_duration_from_data_json(data["event_groups"]["planned_imaging"])) / 60)|round(3) %}
-
 <!-- Expected DHUS products duration -->
 {% set expected_dhus_products_duration = {} %}
 {% for level in parsed_levels[0] %}

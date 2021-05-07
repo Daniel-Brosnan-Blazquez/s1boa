@@ -8,11 +8,11 @@
 {% include "vboa/pagination.html" %}
 {% endwith %}
 
+<!-- Content -->
+{% if list_products_completeness|length > 0 %}
+
 <!-- Summary -->
 {% include "views/dhus_availability/dhus_availability_summary.html" %}
-
-<!-- Content -->
-{% if data["event_groups"]["planned_imaging"]|length > 0 %}
 
 <!-- Maps -->
 {#{% include "views/dhus_availability/dhus_availability_maps.html" %}#}
@@ -21,6 +21,13 @@
 {% if data["metadata"]["show"]["timeliness"] %}
 
 {% include "views/dhus_availability/dhus_availability_e2e_timeliness.html" %}
+
+{% endif %}
+
+<!-- Data volumes -->
+{% if data["metadata"]["show"]["volumes"] %}
+
+{% include "views/dhus_availability/dhus_availability_volumes.html" %}
 
 {% endif %}
 

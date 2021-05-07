@@ -25,12 +25,6 @@
 
       <!-- Completeness summaries -->
       <div class="row">
-        <div class="col-xs-3">
-          <div class="panel panel-primary">
-            <div class="panel-heading" align="center" style="font-size: 20px">Expected acquired radar image duration (m)</div>
-            <div class="panel-body" align="center" style="font-size: 50px; color: steelblue" id="summary-dhus-completeness-expected-radar-image">{{ expected_acquisition_duration }}</div>
-          </div>
-        </div>
         {% for level in parsed_levels[0] %}
         {% if level in parsed_levels[0] %}
         <div class="col-xs-3">
@@ -58,57 +52,28 @@
 </div>
 {% endif %}
 
-<!-- Timeliness -->
-{% if data["metadata"]["show"]["timeliness"] %}
+<!-- Data volumes -->
+{% if data["metadata"]["show"]["volumes"] %}
+{% if ("L0" in parsed_levels[0] and (expected_dhus_products_duration["L0"] - missing_dhus_products_duration["L0"]) > 0) or ("L1_SLC" in parsed_levels[0] and (expected_dhus_products_duration["L1_SLC"] - missing_dhus_products_duration["L1_SLC"]) > 0) or ("L1_GRD" in parsed_levels[0] and (expected_dhus_products_duration["L1_GRD"] - missing_dhus_products_duration["L1_GRD"]) > 0) or ("L2_OCN" in parsed_levels[0] and (expected_dhus_products_duration["L2_OCN"] - missing_dhus_products_duration["L2_OCN"]) > 0) %}
 <div class="row">
   <div class="panel panel-default">
     <div class="panel-heading">
       <h3 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion" href="#summary-dhus-availability-timeliness">DHUS timeliness summary <span class="fa fa-angle-double-down"></span></a>
+        <a data-toggle="collapse" data-parent="#accordion" href="#summary-dhus-availability-volumes">DHUS data volumes summary <span class="fa fa-angle-double-down"></span></a>
       </h3>
     </div>
     <!-- /.panel-heading -->
-    <div class="panel-body panel-collapse collapse in" id="summary-dhus-availability-timeliness">
-      {% for level in parsed_levels[0] %}
-        {% if level in parsed_levels[0] and (expected_dhus_products_duration[level] - missing_dhus_products_duration[level]) > 0 %}
+    <div class="panel-body panel-collapse collapse in" id="summary-dhus-availability-volumes">
       <div class="row">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title">
-              <a data-toggle="collapse" data-parent="#accordion" href="#summary-dhus-availability-timeliness-{{ level }}">DHUS timeliness summary for {{ level }} <span class="fa fa-angle-double-down"></span></a>
-            </h3>
-          </div>
-          <div class="panel-body panel-collapse collapse in" id="summary-dhus-availability-timeliness-{{ level }}">
-            <div class="col-xs-3">
-              <div class="panel panel-primary">
-                <div class="panel-heading" align="center" style="font-size: 20px">Min. delta time to DHUS (m)</div>
-                <div class="panel-body" align="center" style="font-size: 50px; color: steelblue" id="summary-dhus-completeness-minimum-delta-to-dhus-{{ level }}"></div>
-              </div>
-            </div>
-            <div class="col-xs-3">
-              <div class="panel panel-primary">
-                <div class="panel-heading" align="center" style="font-size: 20px">Max. delta time to DHUS (m)</div>
-                <div class="panel-body" align="center" style="font-size: 50px; color: steelblue" id="summary-dhus-completeness-maximum-delta-to-dhus-{{ level }}"></div>
-              </div>
-            </div>
-            <div class="col-xs-3">
-              <div class="panel panel-primary">
-                <div class="panel-heading" align="center" style="font-size: 20px">Avg. delta time to DHUS (m)</div>
-                <div class="panel-body" align="center" style="font-size: 50px; color: steelblue" id="summary-dhus-completeness-average-delta-to-dhus-{{ level }}"></div>
-              </div>
-            </div>
-            <div class="col-xs-3">
-              <div class="panel panel-primary">
-                <div class="panel-heading" align="center" style="font-size: 20px">Standard deviation (m)</div>
-                <div class="panel-body" align="center" style="font-size: 50px; color: steelblue" id="summary-dhus-completeness-std-delta-to-dhus-{{ level }}"></div>
-              </div>
-            </div>
+        <div class="col-xs-3">
+          <div class="panel panel-primary">
+            <div class="panel-heading" align="center" style="font-size: 20px">Data volumes in DHUS</div>
+            <div class="panel-body" align="center" style="font-size: 50px; color: steelblue"><canvas id="dhus-availability-pie-volumes" width="400" height="300"></canvas></div>
           </div>
         </div>
       </div>
-      {% endif %}
-      {% endfor %}
     </div>
   </div>
 </div>
+{% endif %}
 {% endif %}
