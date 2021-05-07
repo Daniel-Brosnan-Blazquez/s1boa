@@ -227,10 +227,7 @@ def process_file(file_path, engine, query, reception_time):
                                             value_filters = [
                                                 {"name": {"filter": "datatake_id", "op": "=="},
                                                  "type": "text",
-                                                 "value": {"filter": datatake_id, "op": "=="}},
-                                                {"name": {"filter": "start_orbit", "op": "=="},
-                                                 "type": "double",
-                                                 "value": {"filter": orbit, "op": "=="}}
+                                                 "value": {"filter": datatake_id, "op": "=="}}
                                             ])
         links_dhus_product = []
         links_dhus_product_completeness = []

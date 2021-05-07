@@ -1,0 +1,27 @@
+[dani@6f760112218c inputs]$ time EBOA_STREAM_LOG=YES eboa_ingestion.py -p s1boa.ingestions.ingestion_nppf.ingestion_nppf -f S1A_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF
+INFO	; (2021-04-24T11:13:42.270) ; eboa_ingestion.py(197) [102] -> Received file S1A_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF
+INFO	; (2021-04-24T11:14:05.521) ; eboa.engine.engine(632) [102] -> The source file S1A_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF associated to the DIM signature NPPF_S1A and DIM processing ingestion_nppf.py with version 1.0 is going to be ingested
+INFO	; (2021-04-24T11:14:19.320) ; eboa.engine.engine(929) [102] -> The source file S1A_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF associated to the DIM signature NPPF_S1A and DIM processing ingestion_nppf.py with version 1.0 has ingested correctly 2215 event/s, 0 annotation/s and 0 alert/s
+INFO	; (2021-04-24T11:14:19.367) ; eboa.engine.engine(632) [102] -> The source file S1A_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF associated to the DIM signature COMPLETENESS_NPPF_S1A and DIM processing ingestion_nppf.py with version 1.0 is going to be ingested
+INFO	; (2021-04-24T11:26:57.941) ; eboa.engine.engine(929) [102] -> The source file S1A_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF associated to the DIM signature COMPLETENESS_NPPF_S1A and DIM processing ingestion_nppf.py with version 1.0 has ingested correctly 7147 event/s, 0 annotation/s and 0 alert/s
+INFO	; (2021-04-24T11:26:57.949) ; eboa_ingestion.py(165) [102] -> The ingestion of the file S1A_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF has been performed correctly for the DIM signature NPPF_S1A using the processor ingestion_nppf.py
+INFO	; (2021-04-24T11:26:57.950) ; eboa_ingestion.py(165) [102] -> The ingestion of the file S1A_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF has been performed correctly for the DIM signature COMPLETENESS_NPPF_S1A using the processor ingestion_nppf.py
+INFO	; (2021-04-24T11:26:57.966) ; eboa_ingestion.py(172) [102] -> The associated alert for notifying about the pending ingestion of the file S1A_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF is going to be deleted from DDBB
+
+real	13m16.973s
+user	8m24.372s
+sys	0m21.442s
+[dani@6f760112218c inputs]$ time EBOA_STREAM_LOG=YES eboa_ingestion.py -p s1boa.ingestions.ingestion_nppf.ingestion_nppf -f S1B_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF 
+INFO	; (2021-04-24T11:29:39.592) ; eboa_ingestion.py(197) [110] -> Received file S1B_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF
+INFO	; (2021-04-24T11:30:03.013) ; eboa.engine.engine(632) [110] -> The source file S1B_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF associated to the DIM signature NPPF_S1B and DIM processing ingestion_nppf.py with version 1.0 is going to be ingested
+INFO	; (2021-04-24T11:30:19.174) ; eboa.engine.engine(929) [110] -> The source file S1B_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF associated to the DIM signature NPPF_S1B and DIM processing ingestion_nppf.py with version 1.0 has ingested correctly 2267 event/s, 0 annotation/s and 0 alert/s
+INFO	; (2021-04-24T11:30:19.221) ; eboa.engine.engine(632) [110] -> The source file S1B_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF associated to the DIM signature COMPLETENESS_NPPF_S1B and DIM processing ingestion_nppf.py with version 1.0 is going to be ingested
+INFO	; (2021-04-24T11:43:08.038) ; eboa.engine.engine(929) [110] -> The source file S1B_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF associated to the DIM signature COMPLETENESS_NPPF_S1B and DIM processing ingestion_nppf.py with version 1.0 has ingested correctly 7153 event/s, 0 annotation/s and 0 alert/s
+INFO	; (2021-04-24T11:43:08.046) ; eboa_ingestion.py(165) [110] -> The ingestion of the file S1B_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF has been performed correctly for the DIM signature NPPF_S1B using the processor ingestion_nppf.py
+INFO	; (2021-04-24T11:43:08.046) ; eboa_ingestion.py(165) [110] -> The ingestion of the file S1B_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF has been performed correctly for the DIM signature COMPLETENESS_NPPF_S1B using the processor ingestion_nppf.py
+INFO	; (2021-04-24T11:43:08.063) ; eboa_ingestion.py(172) [110] -> The associated alert for notifying about the pending ingestion of the file S1B_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001.EOF is going to be deleted from DDBB
+
+real	13m29.733s
+user	8m26.048s
+sys	0m22.836s
+
