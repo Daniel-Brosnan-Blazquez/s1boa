@@ -134,6 +134,7 @@ dhus_availability_data_timeline.push({
 {% endif %}
 
 {% if data["metadata"]["show"]["timeliness"] %}
+{% if status != "MISSING" %}
 if (!("{{ level }}" in dhus_availability_data_timeliness)){
     dhus_availability_data_timeliness["{{ level }}"] = []
 }
@@ -150,13 +151,14 @@ if (!("{{ level }}" in dhus_availability_data_timeliness_for_statistics)){
 }
 dhus_availability_data_timeliness_for_statistics["{{ level }}"].push({{ delta_to_dhus }})
 {% endif %}
+{% endif %}
 
 {% if data["metadata"]["show"]["volumes"] %}
+{% if status != "MISSING" %}
 if (!("{{ level }}" in dhus_availability_data_volumes_for_statistics)){
     dhus_availability_data_volumes_for_statistics["{{ level }}"] = []
 }
 dhus_availability_data_volumes_for_statistics["{{ level }}"].push({{ size }})
-{% endif %}
 
 if (!("{{ level }}" in dhus_availability_data_volumes)){
     dhus_availability_data_volumes["{{ level }}"] = []
@@ -169,5 +171,7 @@ dhus_availability_data_volumes["{{ level }}"].push({
     "tooltip": create_dhus_availability_tooltip("{{ level }}", "{{ satellite }}", "{{ orbit_for_tooltip }}", "{{ completeness.start }}", "{{ completeness.stop }}", "{{ (completeness.duration / 60)|round(3) }}", "{{ status_for_tooltip }}", "{{ dhus_product_for_tooltip }}", "{{ delta_to_dhus_for_tooltip }}", "{{ size_for_tooltip }}", "{{ datatake_id }}", "{{ planned_imaging_start }}", "{{ planned_imaging_stop }}", "{{ planned_imaging_duration }}"),
     "className": "{{ class_name }}"
 })
+{% endif %}
+{% endif %}
 
 {% endfor %}
