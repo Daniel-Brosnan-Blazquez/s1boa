@@ -12,7 +12,6 @@ from dateutil import parser
 import datetime
 import tempfile
 import json
-import pdb
 
 # Import xml parser
 from lxml import etree
@@ -100,12 +99,47 @@ def process_file(file_path, engine, query, reception_time):
     reported_generation_time = file_name[25:40]
     reported_validity_start = file_name[42:57]
     reported_validity_stop = file_name[58:73]
+    sensing_start_nodes = xpath_xml("/feed/entry/properties/ContentDate/Start")
+    sensing_stop_nodes = xpath_xml("/feed/entry/properties/ContentDate/End")
+    if len(sensing_start_nodes) > 0:
+        sensing_starts = [node.text for node in sensing_start_nodes]
+        sensing_starts.sort()
+        # Apply same margin applied for events
+        validity_start = (parser.parse(sensing_starts[0]) - datetime.timedelta(seconds=1)).isoformat()
+    else:
+        validity_start = reported_validity_start
+    # end if
+    if len(sensing_stop_nodes) > 0:
+        sensing_stops = [node.text for node in sensing_stop_nodes]
+        sensing_stops.sort()
+        validity_stop = sensing_stops[-1]
+    else:
+        validity_stop = reported_validity_stop
+    # end if
     ingestion_completeness = "true"
     ingestion_completeness_message = ""
 
     eboa_ingestion_functions.insert_ingestion_progress(session_progress, general_source_progress, 40)
 
     dhus_products = xpath_xml("/feed/entry")
+    indexed_planned_imagings = {}
+    if len(dhus_products) > 0:
+        # Obtain the planned imaging
+        planned_imagings = query.get_events(gauge_names = {"filter": "PLANNED_IMAGING", "op": "=="},
+                                            gauge_systems = {"filter": satellite, "op": "=="},
+                                            start_filters = [{"date": validity_stop, "op": "<"}],
+                                            stop_filters = [{"date": validity_start, "op": ">"}])
+
+        for planned_imaging in planned_imagings:
+            datatake_id_values = [value for value in planned_imaging.eventTexts if value.name == "datatake_id"]
+            datatake_id = datatake_id_values[0].value
+                    
+            indexed_planned_imagings[datatake_id] = planned_imaging
+        # end for
+    # end if
+
+    eboa_ingestion_functions.insert_ingestion_progress(session_progress, general_source_progress, 60)
+
     for dhus_product in dhus_products:
         ########
         # Obtain metadata
@@ -219,35 +253,25 @@ def process_file(file_path, engine, query, reception_time):
         ########
         # Define dhus product event
         ########
-        # Obtain the planned imaging
-        planned_imagings = query.get_events(gauge_names = {"filter": "PLANNED_IMAGING", "op": "=="},
-                                            gauge_systems = {"filter": satellite, "op": "=="},
-                                            start_filters = [{"date": stop, "op": "<"}],
-                                            stop_filters = [{"date": start, "op": ">"}],
-                                            value_filters = [
-                                                {"name": {"filter": "datatake_id", "op": "=="},
-                                                 "type": "text",
-                                                 "value": {"filter": datatake_id, "op": "=="}}
-                                            ])
         links_dhus_product = []
         links_dhus_product_completeness = []
         alerts = []
         status = "PUBLISHED"
-        if len(planned_imagings) > 0:
-            for planned_imaging in planned_imagings:
-                links_dhus_product.append({
-                    "link": str(planned_imaging.event_uuid),
-                    "link_mode": "by_uuid",
-                    "name": "DHUS_PRODUCT",
-                    "back_ref": "PLANNED_IMAGING"
-                })
-                links_dhus_product_completeness.append({
-                    "link": str(planned_imaging.event_uuid),
-                    "link_mode": "by_uuid",
-                    "name": "DHUS_PRODUCT_COMPLETENESS",
-                    "back_ref": "PLANNED_IMAGING"
-                })
-            # end for
+        if datatake_id in indexed_planned_imagings:
+            # Obtain the planned imaging
+            planned_imaging = indexed_planned_imagings[datatake_id]
+            links_dhus_product.append({
+                "link": str(planned_imaging.event_uuid),
+                "link_mode": "by_uuid",
+                "name": "DHUS_PRODUCT",
+                "back_ref": "PLANNED_IMAGING"
+            })
+            links_dhus_product_completeness.append({
+                "link": str(planned_imaging.event_uuid),
+                "link_mode": "by_uuid",
+                "name": "DHUS_PRODUCT_COMPLETENESS",
+                "back_ref": "PLANNED_IMAGING"
+            })
         else:
             status = "UNEXPECTED"
             alerts.append({
@@ -343,8 +367,10 @@ def process_file(file_path, engine, query, reception_time):
             "name": file_name,
             "reception_time": reception_time,
             "generation_time": reported_generation_time,
-            "validity_start": reported_validity_start,
-            "validity_stop": reported_validity_stop,
+            "reported_validity_start": reported_validity_start,
+            "reported_validity_stop": reported_validity_stop,
+            "validity_start": validity_start,
+            "validity_stop": validity_stop,
             "priority": 30,
             "ingestion_completeness": {
                 "check": ingestion_completeness,
@@ -369,8 +395,10 @@ def process_file(file_path, engine, query, reception_time):
             "name": file_name,
             "reception_time": reception_time,
             "generation_time": reported_generation_time,
-            "validity_start": reported_validity_start,
-            "validity_stop": reported_validity_stop,
+            "reported_validity_start": reported_validity_start,
+            "reported_validity_stop": reported_validity_stop,
+            "validity_start": validity_start,
+            "validity_stop": validity_stop,
             "priority": 30
         },
         "events": list_of_completeness_events

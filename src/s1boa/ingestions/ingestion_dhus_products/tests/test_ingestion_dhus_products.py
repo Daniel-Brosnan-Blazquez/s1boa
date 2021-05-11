@@ -48,8 +48,8 @@ class TestOpdhus(unittest.TestCase):
         assert len(sources) == 2
 
         # Check the sources inserted
-        sources = self.query_eboa.get_sources(validity_start_filters = [{"date": "2021-03-16T00:00:00", "op": "=="}],
-                                              validity_stop_filters = [{"date": "2021-03-19T00:00:00", "op": "=="}],
+        sources = self.query_eboa.get_sources(validity_start_filters = [{"date": "2021-03-16T18:10:52.109000", "op": "=="}],
+                                              validity_stop_filters = [{"date": "2021-03-17T12:31:42.878000", "op": "=="}],
                                               reported_validity_start_filters = [{"date": "2021-03-16T00:00:00", "op": "=="}],
                                               reported_validity_stop_filters = [{"date": "2021-03-19T00:00:00", "op": "=="}],
                                               generation_time_filters = [{"date": "2021-04-19T13:54:05", "op": "=="}],
@@ -60,8 +60,8 @@ class TestOpdhus(unittest.TestCase):
 
         assert len(sources) == 1
 
-        sources = self.query_eboa.get_sources(validity_start_filters = [{"date": "2021-03-16T00:00:00", "op": "=="}],
-                                              validity_stop_filters = [{"date": "2021-03-19T00:00:00", "op": "=="}],
+        sources = self.query_eboa.get_sources(validity_start_filters = [{"date": "2021-03-16T18:10:52.109000", "op": "=="}],
+                                              validity_stop_filters = [{"date": "2021-03-17T12:31:42.878000", "op": "=="}],
                                               reported_validity_start_filters = [{"date": "2021-03-16T00:00:00", "op": "=="}],
                                               reported_validity_stop_filters = [{"date": "2021-03-19T00:00:00", "op": "=="}],
                                               generation_time_filters = [{"date": "2021-04-19T13:54:05", "op": "=="}],
