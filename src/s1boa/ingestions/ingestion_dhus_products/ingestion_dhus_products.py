@@ -282,7 +282,7 @@ def process_file(file_path, engine, query, reception_time):
                     "name": "ALERT-0200: NO PLANNED IMAGING FOR A DHUS PRODUCT",
                     "severity": "fatal",
                     "description": "Alert refers to the missing planned imaging for the corresponding DHUS product",
-                    "group": "DHUS"
+                    "group": "S1_DHUS"
                 }
             })
             ingestion_completeness = "false"
