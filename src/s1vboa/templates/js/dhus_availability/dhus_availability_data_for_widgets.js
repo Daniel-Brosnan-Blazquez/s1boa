@@ -47,7 +47,7 @@ var dhus_availability_data_volumes_for_statistics = {}
 {% set size_for_tooltip = "DISCARD" %}
 {% endif %}
 
-{% if "explicit_reference" in completeness %}
+{% if status != "MISSING" %}
 {% set dhus_product = completeness["explicit_reference"]["name"] %}
 {% endif %}
 
@@ -121,6 +121,16 @@ var dhus_availability_data_volumes_for_statistics = {}
 {% set planned_imaging_duration = "N/A" %}
 {% endif %}
 
+{# Define the imaging mode #}
+{% if planned_imaging %}
+{% set planned_imaging_values = planned_imaging|get_values([{"name": {"filter": "imaging_mode_long_name","op": "=="}, "group":"imaging_mode"}]) %}
+{% set imaging_mode = planned_imaging_values["imaging_mode"][0]["value"] %}
+{% elif status != "MISSING" %}
+{% set imaging_mode = dhus_product[4:6] %}
+{% else %}
+{% set imaging_mode = "N/A" %}
+{% endif %}
+
 {% if data["metadata"]["show"]["completeness"] %}
 dhus_availability_data_timeline.push({
     "id": "{{ completeness.event_uuid }}",
@@ -128,7 +138,7 @@ dhus_availability_data_timeline.push({
     "timeline": "{{ level }}",
     "start": "{{ completeness['start'] }}",
     "stop": "{{ completeness['stop'] }}",
-    "tooltip": create_dhus_availability_tooltip("{{ level }}", "{{ satellite }}", "{{ orbit_for_tooltip }}", "{{ completeness.start }}", "{{ completeness.stop }}", "{{ (completeness.duration / 60)|round(3) }}", "{{ status_for_tooltip }}", "{{ dhus_product_for_tooltip }}", "{{ delta_to_dhus_for_tooltip }}", "{{ size_for_tooltip }}", "{{ datatake_id }}", "{{ planned_imaging_start }}", "{{ planned_imaging_stop }}", "{{ planned_imaging_duration }}"),
+    "tooltip": create_dhus_availability_tooltip("{{ level }}", "{{ satellite }}", "{{ orbit_for_tooltip }}", "{{ completeness.start }}", "{{ completeness.stop }}", "{{ (completeness.duration / 60)|round(3) }}", "{{ imaging_mode }}", "{{ status_for_tooltip }}", "{{ dhus_product_for_tooltip }}", "{{ delta_to_dhus_for_tooltip }}", "{{ size_for_tooltip }}", "{{ datatake_id }}", "{{ planned_imaging_start }}", "{{ planned_imaging_stop }}", "{{ planned_imaging_duration }}"),
     "className": "{{ class_name }}"
 })
 {% endif %}
@@ -143,7 +153,7 @@ dhus_availability_data_timeliness["{{ level }}"].push({
     "group": "{{ satellite }}",
     "x": "{{ completeness.start }}",
     "y": "{{ delta_to_dhus }}",
-    "tooltip": create_dhus_availability_tooltip("{{ level }}", "{{ satellite }}", "{{ orbit_for_tooltip }}", "{{ completeness.start }}", "{{ completeness.stop }}", "{{ (completeness.duration / 60)|round(3) }}", "{{ status_for_tooltip }}", "{{ dhus_product_for_tooltip }}", "{{ delta_to_dhus_for_tooltip }}", "{{ size_for_tooltip }}", "{{ datatake_id }}", "{{ planned_imaging_start }}", "{{ planned_imaging_stop }}", "{{ planned_imaging_duration }}"),
+    "tooltip": create_dhus_availability_tooltip("{{ level }}", "{{ satellite }}", "{{ orbit_for_tooltip }}", "{{ completeness.start }}", "{{ completeness.stop }}", "{{ (completeness.duration / 60)|round(3) }}", "{{ imaging_mode }}", "{{ status_for_tooltip }}", "{{ dhus_product_for_tooltip }}", "{{ delta_to_dhus_for_tooltip }}", "{{ size_for_tooltip }}", "{{ datatake_id }}", "{{ planned_imaging_start }}", "{{ planned_imaging_stop }}", "{{ planned_imaging_duration }}"),
     "className": "{{ class_name }}"
 })
 if (!("{{ level }}" in dhus_availability_data_timeliness_for_statistics)){
@@ -168,7 +178,7 @@ dhus_availability_data_volumes["{{ level }}"].push({
     "group": "{{ satellite }}",
     "x": "{{ completeness.start }}",
     "y": vboa.math.sum(dhus_availability_data_volumes_for_statistics["{{ level }}"]),
-    "tooltip": create_dhus_availability_tooltip("{{ level }}", "{{ satellite }}", "{{ orbit_for_tooltip }}", "{{ completeness.start }}", "{{ completeness.stop }}", "{{ (completeness.duration / 60)|round(3) }}", "{{ status_for_tooltip }}", "{{ dhus_product_for_tooltip }}", "{{ delta_to_dhus_for_tooltip }}", "{{ size_for_tooltip }}", "{{ datatake_id }}", "{{ planned_imaging_start }}", "{{ planned_imaging_stop }}", "{{ planned_imaging_duration }}"),
+    "tooltip": create_dhus_availability_tooltip("{{ level }}", "{{ satellite }}", "{{ orbit_for_tooltip }}", "{{ completeness.start }}", "{{ completeness.stop }}", "{{ (completeness.duration / 60)|round(3) }}", "{{ imaging_mode }}", "{{ status_for_tooltip }}", "{{ dhus_product_for_tooltip }}", "{{ delta_to_dhus_for_tooltip }}", "{{ size_for_tooltip }}", "{{ datatake_id }}", "{{ planned_imaging_start }}", "{{ planned_imaging_stop }}", "{{ planned_imaging_duration }}"),
     "className": "{{ class_name }}"
 })
 {% endif %}

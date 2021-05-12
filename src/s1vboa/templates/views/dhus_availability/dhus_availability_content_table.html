@@ -40,6 +40,7 @@
             <th>Start</th>
             <th>Stop</th>
             <th>Duration (m)</th>
+            <th>Imaging mode</th>
             <th>Status</th>
             <th>Product</th>
             {% if data["metadata"]["show"]["timeliness"] %}
@@ -81,8 +82,18 @@
           {% set dhus_product = "N/A" %}
           {% set delta_to_dhus = "N/A" %}
           {% set size = "N/A" %}
-          {% if "explicit_reference" in completeness %}
+          {% if status != "MISSING" %}
           {% set dhus_product = completeness["explicit_reference"]["name"] %}
+          {% endif %}
+
+          <!-- Define the imaging mode -->
+          {% if planned_imaging %}
+          {% set planned_imaging_values = planned_imaging|get_values([{"name": {"filter": "imaging_mode_long_name","op": "=="}, "group":"imaging_mode"}]) %}
+          {% set imaging_mode = planned_imaging_values["imaging_mode"][0]["value"] %}
+          {% elif status != "MISSING" %}
+          {% set imaging_mode = dhus_product[4:6] %}
+          {% else %}
+          {% set imaging_mode = "N/A" %}
           {% endif %}
 
           <!-- Define status class -->
@@ -134,6 +145,7 @@
             <td>{{ completeness.start }}</td>
             <td>{{ completeness.stop }}</td>
             <td>{{ (completeness.duration / 60)|round(3) }}</td>
+            <td>{{ imaging_mode }}</td>
             {% if planned_imaging %}
             <td><a class="{{ status_class }}" href="/views/dhus-availability-by-datatake/{{ planned_imaging.event_uuid }}">{{ status }}</a></td>
             {% else %}
@@ -180,6 +192,7 @@
             <th>Start</th>
             <th>Stop</th>
             <th>Duration (m)</th>
+            <th>Imaging mode</th>
             <th>Status</th>
             <th>Product</th>
             {% if data["metadata"]["show"]["timeliness"] %}

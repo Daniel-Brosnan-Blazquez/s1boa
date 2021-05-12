@@ -1,5 +1,5 @@
 /* Function to create the text for the tooltip of the widgets */
-function create_dhus_availability_tooltip(level, satellite, orbit, start, stop, duration, status, product, delta_to_dhus, size, datatake_id, datatake_start, datatake_stop, datatake_duration){
+function create_dhus_availability_tooltip(level, satellite, orbit, start, stop, duration, imaging_mode, status, product, delta_to_dhus, size, datatake_id, datatake_start, datatake_stop, datatake_duration){
 
     
     
@@ -10,6 +10,7 @@ function create_dhus_availability_tooltip(level, satellite, orbit, start, stop, 
         "<tr><td>Start</td><td>" + start + "</td></tr>" +
         "<tr><td>Stop</td><td>" + stop + "</td></tr>" +
         "<tr><td>Duration (m)</td><td>" + duration + "</td></tr>" +
+        "<tr><td>Imaging mode</td><td>" + imaging_mode + "</td></tr>" +
         "<tr><td>Status</td><td>" + status + "</td></tr>" +
         "<tr><td>Product</td><td>" + product + "</td></tr>"
 
