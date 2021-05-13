@@ -34,6 +34,9 @@
 <!-- Table with missing disseminations -->
 {% if data["metadata"]["show"]["completeness"] %}
 
+<!-- Completeness maps -->
+{% include "views/dhus_availability/dhus_availability_maps.html" %}
+
 <!-- Completeness timeline -->
 {% include "views/dhus_availability/dhus_availability_timeline.html" %}
 

@@ -57,7 +57,6 @@
 
   {# Pie completeness #}
   {% for level in parsed_levels[0] %}
-  {% if level in parsed_levels[0] and (expected_generated_dhus_products_duration[level] > 0 or unexpected_dhus_products_duration[level] > 0) %}
   var completeness = [{{ expected_generated_dhus_products_duration[level]|round(3) }}, {{ missing_dhus_products_duration[level]|round(3) }}, {{ unexpected_dhus_products_duration[level]|round(3) }}]
   var completeness_background_color = ["green", "darkred", "darkblue"]
   var completeness_labels = ["{{ level }} expected available in DHUS", "{{ level }} missing in DHUS", "{{ level }} unexpected available in DHUS"]
@@ -71,7 +70,12 @@
   }
   
   vboa.display_pie("dhus-availability-pie-{{ level }}-completeness", data)
-  {% endif %}
+
+  {# Map #}
+  var polygons = []
+  vboa.prepare_events_geometries_for_map(dhus_availability_data_maps["{{ level }}"], polygons);
+  vboa.display_map("dhus-availability-map-{{ level }}", polygons);
+  
   {% endfor %}
 
   var groups = [];

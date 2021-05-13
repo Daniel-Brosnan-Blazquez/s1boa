@@ -1,5 +1,6 @@
 var dhus_availability_data_timeline = []
 var dhus_availability_data_timeliness = {}
+var dhus_availability_data_maps = {}
 var dhus_availability_data_timeliness_for_statistics = {}
 var dhus_availability_data_volumes = {}
 var dhus_availability_data_volumes_for_statistics = {}
@@ -13,7 +14,7 @@ var dhus_availability_data_volumes_for_statistics = {}
 {% set level = completeness["gauge"]["name"].replace("PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_", "") %}
 
 {# Obtain relevant values #}
-{% set values = completeness|get_values([{"name": {"filter": "satellite","op": "=="}, "group":"satellite"}, {"name": {"filter": ["orbit","start_orbit"],"op": "in"}, "group":"orbit"}, {"name": {"filter": "status","op": "=="}, "group":"status"}, {"name": {"filter": "datatake_id","op": "=="}, "group":"datatake_id"}]) %}
+{% set values = completeness|get_values([{"name": {"filter": "satellite","op": "=="}, "group":"satellite"}, {"name": {"filter": ["orbit","start_orbit"],"op": "in"}, "group":"orbit"}, {"name": {"filter": "status","op": "=="}, "group":"status"}, {"name": {"filter": "datatake_id","op": "=="}, "group":"datatake_id"}, {"name": {"filter": "footprint","op": "=="}, "group":"footprint"}]) %}
 {# Obtain satellite #}
 {% set satellite = values["satellite"][0]["value"] %}
 
@@ -56,15 +57,29 @@ var dhus_availability_data_volumes_for_statistics = {}
 
 {% set class_name = "fill-border-red" %}
 {% set status_class = "bold-red" %}
+{% set map_style = {
+    "stroke_color": "red",
+    "fill_color": "rgba(255,0,0,0.3)",
+} %}
 
 {% else %}
 
 {% if status == "UNEXPECTED" %}
 {% set class_name = "fill-border-blue" %}
 {% set status_class = "bold-blue" %}
+{% set map_style = {
+    "stroke_color": "blue",
+    "fill_color": "rgba(0,0,255,0.3)",
+} %}
+
 {% else %}
 {% set class_name = "fill-border-green" %}
 {% set status_class = "bold-green" %}
+{% set map_style = {
+    "stroke_color": "green",
+    "fill_color": "rgba(0,255,0,0.3)",
+} %}
+
 {% endif %}
 
 {% if data["metadata"]["show"]["timeliness"] or data["metadata"]["show"]["volumes"] %}
@@ -140,6 +155,23 @@ dhus_availability_data_timeline.push({
     "stop": "{{ completeness['stop'] }}",
     "tooltip": create_dhus_availability_tooltip("{{ level }}", "{{ satellite }}", "{{ orbit_for_tooltip }}", "{{ completeness.start }}", "{{ completeness.stop }}", "{{ (completeness.duration / 60)|round(3) }}", "{{ imaging_mode }}", "{{ status_for_tooltip }}", "{{ dhus_product_for_tooltip }}", "{{ delta_to_dhus_for_tooltip }}", "{{ size_for_tooltip }}", "{{ datatake_id }}", "{{ planned_imaging_start }}", "{{ planned_imaging_stop }}", "{{ planned_imaging_duration }}"),
     "className": "{{ class_name }}"
+})
+
+{# Maps #}
+if (!("{{ level }}" in dhus_availability_data_maps)){
+    dhus_availability_data_maps["{{ level }}"] = []
+}
+dhus_availability_data_maps["{{ level }}"].push({
+
+    "id": "{{ completeness.event_uuid }}",
+    "tooltip": create_dhus_availability_tooltip("{{ level }}", "{{ satellite }}", "{{ orbit_for_tooltip }}", "{{ completeness.start }}", "{{ completeness.stop }}", "{{ (completeness.duration / 60)|round(3) }}", "{{ imaging_mode }}", "{{ status_for_tooltip }}", "{{ dhus_product_for_tooltip }}", "{{ delta_to_dhus_for_tooltip }}", "{{ size_for_tooltip }}", "{{ datatake_id }}", "{{ planned_imaging_start }}", "{{ planned_imaging_stop }}", "{{ planned_imaging_duration }}"),
+    "geometries": [
+        {% for geometry in values["footprint"] %}
+        {{ geometry }},
+        {% endfor %}
+    ],
+    "style": {{ map_style }}
+
 })
 {% endif %}
 

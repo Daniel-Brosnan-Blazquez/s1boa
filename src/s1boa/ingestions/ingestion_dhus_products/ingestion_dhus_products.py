@@ -19,6 +19,7 @@ from lxml import etree
 # Import ingestion_functions.helpers
 import eboa.ingestion.functions as eboa_ingestion_functions
 import siboa.ingestions.functions as siboa_ingestion_functions
+import s1boa.ingestions.functions as s1boa_ingestion_functions
 
 # Import debugging
 from eboa.debugging import debug
@@ -51,10 +52,10 @@ def process_file(file_path, engine, query, reception_time):
     :return: data with the structure to be inserted into the DDBB
     :rtype: dict
     """
-    list_of_events = []
+    events_per_imaging_mode = {}
+    completeness_events_per_imaging_mode = {}
     list_of_annotations = []
     list_of_explicit_references = []
-    list_of_completeness_events = []
     file_name = os.path.basename(file_path)
 
     # Get the general source entry (processor = None, version = None, DIM signature = PENDING_SOURCES)
@@ -145,6 +146,7 @@ def process_file(file_path, engine, query, reception_time):
         # Obtain metadata
         ########
         name = dhus_product.xpath("properties/Name")[0].text
+        imaging_mode = name[4:6]
         identifier = dhus_product.xpath("properties/Id")[0].text
         ingestion_date = dhus_product.xpath("properties/IngestionDate")[0].text
         creation_date = dhus_product.xpath("properties/CreationDate")[0].text
@@ -260,6 +262,8 @@ def process_file(file_path, engine, query, reception_time):
         if datatake_id in indexed_planned_imagings:
             # Obtain the planned imaging
             planned_imaging = indexed_planned_imagings[datatake_id]
+            imaging_mode_values = [value for value in planned_imaging.eventTexts if value.name == "imaging_mode"]
+            imaging_mode = imaging_mode_values[0].value
             links_dhus_product.append({
                 "link": str(planned_imaging.event_uuid),
                 "link_mode": "by_uuid",
@@ -305,6 +309,10 @@ def process_file(file_path, engine, query, reception_time):
                 {"name": "satellite",
                  "type": "text",
                  "value": satellite},
+                {"name": "imaging_mode",
+                 "type": "text",
+                 "value": imaging_mode
+                },
                 {"name": "datatake_id",
                  "type": "text",
                  "value": datatake_id
@@ -316,7 +324,7 @@ def process_file(file_path, engine, query, reception_time):
             ]
         }
 
-        list_of_events.append(dhus_product_event)
+        s1boa_ingestion_functions.insert_event(dhus_product_event, events_per_imaging_mode, imaging_mode)
 
         # Dhus product completeness event
         # Completeness timings
@@ -337,6 +345,10 @@ def process_file(file_path, engine, query, reception_time):
                 {"name": "satellite",
                  "type": "text",
                  "value": satellite},
+                {"name": "imaging_mode",
+                 "type": "text",
+                 "value": imaging_mode
+                },
                 {"name": "datatake_id",
                  "type": "text",
                  "value": datatake_id
@@ -351,9 +363,13 @@ def process_file(file_path, engine, query, reception_time):
             ]
         }
 
-        list_of_completeness_events.append(dhus_product_completeness_event)
+        s1boa_ingestion_functions.insert_event(dhus_product_completeness_event, completeness_events_per_imaging_mode, imaging_mode)
 
     # end for
+
+    list_of_events_with_footprints = s1boa_ingestion_functions.associate_footprints(events_per_imaging_mode, satellite)
+
+    list_of_completeness_events_with_footprints = s1boa_ingestion_functions.associate_footprints(completeness_events_per_imaging_mode, satellite)
     
     # Build the json
     dhus_products_operation = {
@@ -378,7 +394,7 @@ def process_file(file_path, engine, query, reception_time):
             } 
         },
         "explicit_references": list_of_explicit_references,
-        "events": list_of_events,
+        "events": list_of_events_with_footprints,
         "annotations": list_of_annotations
     }
     
@@ -401,7 +417,7 @@ def process_file(file_path, engine, query, reception_time):
             "validity_stop": validity_stop,
             "priority": 30
         },
-        "events": list_of_completeness_events
+        "events": list_of_completeness_events_with_footprints
     }
 
     data = {"operations": [dhus_products_operation, nppf_completeness_operation]}

@@ -18,6 +18,7 @@ from lxml import etree
 # Import ingestion_functions.helpers
 import eboa.ingestion.functions as eboa_ingestion_functions
 import siboa.ingestions.functions as siboa_ingestion_functions
+import s1boa.ingestions.functions as s1boa_ingestion_functions
 
 # Import debugging
 from eboa.debugging import debug
@@ -122,15 +123,17 @@ playback_means_by_stop={
 }
 
 @debug
-def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_completeness_events):
+def _generate_imaging_events(xpath_xml, source, events_per_imaging_mode, completeness_events_per_imaging_mode):
     """
     Method to generate the events for the imaging operations
     :param xpath_xml: source of information that was xpath evaluated
     :type xpath_xml: XPathEvaluator
     :param source: information of the source
     :type xpath_xml: dict
-    :param list_of_events: list to store the events to be inserted into the eboa
-    :type list_of_events: list
+    :param events_per_imaging_mode: dict to store the events per imaging mode
+    :type events_per_imaging_mode: dict
+    :param completeness_events_per_imaging_mode: dict to store the completeness events per imaging mode
+    :type completeness_events_per_imaging_mode: dict
     """
 
     satellite = source["name"][0:3]
@@ -278,7 +281,7 @@ def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_complete
         # end if
 
         # Insert event
-        eboa_ingestion_functions.insert_event_for_ingestion(imaging_event, source, list_of_events)
+        s1boa_ingestion_functions.insert_event(imaging_event, events_per_imaging_mode, imaging_mode["short_name"], source)
 
         ########
         # Define completeness events
@@ -329,7 +332,7 @@ def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_complete
                 }]
             }
             # Insert event
-            eboa_ingestion_functions.insert_event_for_ingestion(completeness_event, source, list_of_completeness_events)
+            s1boa_ingestion_functions.insert_event(completeness_event, completeness_events_per_imaging_mode, imaging_mode["short_name"], source)
 
         # end if
 
@@ -363,7 +366,7 @@ def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_complete
                 }]
             }
             # Insert event
-            eboa_ingestion_functions.insert_event_for_ingestion(completeness_event, source, list_of_completeness_events)
+            s1boa_ingestion_functions.insert_event(completeness_event, completeness_events_per_imaging_mode, imaging_mode["short_name"], source)
         # end if
 
         # L1 GRD
@@ -396,7 +399,7 @@ def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_complete
                 }]
             }
             # Insert event
-            eboa_ingestion_functions.insert_event_for_ingestion(completeness_event, source, list_of_completeness_events)
+            s1boa_ingestion_functions.insert_event(completeness_event, completeness_events_per_imaging_mode, imaging_mode["short_name"], source)
         # end if
 
         # L2 OCN
@@ -429,7 +432,7 @@ def _generate_imaging_events(xpath_xml, source, list_of_events, list_of_complete
                 }]
             }
             # Insert event
-            eboa_ingestion_functions.insert_event_for_ingestion(completeness_event, source, list_of_completeness_events)
+            s1boa_ingestion_functions.insert_event(completeness_event, completeness_events_per_imaging_mode, imaging_mode["short_name"], source)
         # end if
 
     # end for
@@ -451,8 +454,8 @@ def process_file(file_path, engine, query, reception_time, tgz_filename = None):
     :param tgz_filename: file name of the original TGZ file
     :type tgz_filename: str
     """
-    list_of_events = []
-    list_of_completeness_events = []
+    events_per_imaging_mode = {}
+    completeness_events_per_imaging_mode = {}
     if tgz_filename != None:
         file_name = tgz_filename
     else:
@@ -504,9 +507,13 @@ def process_file(file_path, engine, query, reception_time, tgz_filename = None):
     eboa_ingestion_functions.insert_ingestion_progress(session_progress, general_source_progress, 10)
 
     # Generate imaging events
-    _generate_imaging_events(xpath_xml, source, list_of_events, list_of_completeness_events)
+    _generate_imaging_events(xpath_xml, source, events_per_imaging_mode, completeness_events_per_imaging_mode)
 
     eboa_ingestion_functions.insert_ingestion_progress(session_progress, general_source_progress, 40)
+
+    list_of_events_with_footprints = s1boa_ingestion_functions.associate_footprints(events_per_imaging_mode, satellite)
+
+    list_of_completeness_events_with_footprints = s1boa_ingestion_functions.associate_footprints(completeness_events_per_imaging_mode, satellite)
     
     # Build the json
     nppf_operation = {
@@ -517,7 +524,7 @@ def process_file(file_path, engine, query, reception_time, tgz_filename = None):
             "version": version
         },
         "source": source,
-        "events": list_of_events
+        "events": list_of_events_with_footprints
     }
 
     eboa_ingestion_functions.insert_ingestion_progress(session_progress, general_source_progress, 50)
@@ -539,7 +546,7 @@ def process_file(file_path, engine, query, reception_time, tgz_filename = None):
             "validity_stop": validity_stop,
             "priority": 10
         },
-        "events": list_of_completeness_events
+        "events": list_of_completeness_events_with_footprints
     }
 
     data = {"operations": [nppf_operation, nppf_completeness_operation]}
