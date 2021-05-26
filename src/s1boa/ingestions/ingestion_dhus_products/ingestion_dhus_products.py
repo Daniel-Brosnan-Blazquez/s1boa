@@ -52,7 +52,7 @@ def process_file(file_path, engine, query, reception_time):
     :return: data with the structure to be inserted into the DDBB
     :rtype: dict
     """
-    events_per_imaging_mode = {}
+    list_of_dhus_product_events = []
     completeness_events_per_imaging_mode = {}
     list_of_annotations = []
     list_of_explicit_references = []
@@ -239,17 +239,6 @@ def process_file(file_path, engine, query, reception_time):
                 }]
         }
 
-        # Insert geometries
-        iterator = 0
-        for coordinates in list_formatted_coordinates_corrected:
-            dhus_metadata_annotation["values"].append(
-                {"name": "coordinates_" + str(iterator),
-                 "type": "geometry",
-                 "value": list_formatted_coordinates_corrected[iterator].replace(",", " ")}
-            )
-            iterator += 1
-        # end for
-
         list_of_annotations.append(dhus_metadata_annotation)
 
         ########
@@ -309,10 +298,6 @@ def process_file(file_path, engine, query, reception_time):
                 {"name": "satellite",
                  "type": "text",
                  "value": satellite},
-                {"name": "imaging_mode",
-                 "type": "text",
-                 "value": imaging_mode
-                },
                 {"name": "datatake_id",
                  "type": "text",
                  "value": datatake_id
@@ -324,7 +309,23 @@ def process_file(file_path, engine, query, reception_time):
             ]
         }
 
-        s1boa_ingestion_functions.insert_event(dhus_product_event, events_per_imaging_mode, imaging_mode)
+        list_of_dhus_product_events.append(dhus_product_event)
+
+        # Insert geometries
+        iterator = 0
+        for coordinates in list_formatted_coordinates_corrected:
+            dhus_metadata_annotation["values"].append(
+                {"name": "coordinates_" + str(iterator),
+                 "type": "geometry",
+                 "value": list_formatted_coordinates_corrected[iterator].replace(",", " ")}
+            )
+            dhus_product_event["values"].append(
+                {"name": "coordinates_" + str(iterator),
+                 "type": "geometry",
+                 "value": list_formatted_coordinates_corrected[iterator].replace(",", " ")}
+            )
+            iterator += 1
+        # end for
 
         # Dhus product completeness event
         # Completeness timings
@@ -367,8 +368,6 @@ def process_file(file_path, engine, query, reception_time):
 
     # end for
 
-    list_of_events_with_footprints = s1boa_ingestion_functions.associate_footprints(events_per_imaging_mode, satellite)
-
     list_of_completeness_events_with_footprints = s1boa_ingestion_functions.associate_footprints(completeness_events_per_imaging_mode, satellite)
     
     # Build the json
@@ -394,7 +393,7 @@ def process_file(file_path, engine, query, reception_time):
             } 
         },
         "explicit_references": list_of_explicit_references,
-        "events": list_of_events_with_footprints,
+        "events": list_of_dhus_product_events,
         "annotations": list_of_annotations
     }
     
