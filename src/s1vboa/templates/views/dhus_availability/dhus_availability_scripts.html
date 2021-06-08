@@ -56,17 +56,20 @@
   {% if data["metadata"]["show"]["completeness"] %}
 
   {# Pie completeness #}
+  var completeness = {}
+  var completeness_background_color = {}
+  var completeness_labels = {}
   {% for level in parsed_levels[0] %}
-  var completeness = [{{ expected_generated_dhus_products_duration[level]|round(3) }}, {{ missing_dhus_products_duration[level]|round(3) }}, {{ unexpected_dhus_products_duration[level]|round(3) }}]
-  var completeness_background_color = ["green", "darkred", "darkblue"]
-  var completeness_labels = ["{{ level }} expected available in DHUS", "{{ level }} missing in DHUS", "{{ level }} unexpected available in DHUS"]
+  completeness["{{ level }}"]  = [{{ expected_generated_dhus_products_duration[level]|round(3) }}, {{ missing_dhus_products_duration[level]|round(3) }}, {{ unexpected_dhus_products_duration[level]|round(3) }}]
+  completeness_background_color["{{ level }}"]  = ["green", "darkred", "darkblue"]
+  completeness_labels["{{ level }}"]  = ["{{ level }} expected available in DHUS", "{{ level }} missing in DHUS", "{{ level }} unexpected available in DHUS"]
 
   var data = {
   datasets: [{
-  data: completeness,
-  backgroundColor: completeness_background_color
+  data: completeness["{{ level }}"],
+  backgroundColor: completeness_background_color["{{ level }}"]
   }],
-  labels: completeness_labels
+  labels: completeness_labels["{{ level }}"]
   }
   
   vboa.display_pie("dhus-availability-pie-{{ level }}-completeness", data)
