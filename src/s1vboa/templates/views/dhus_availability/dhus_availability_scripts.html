@@ -128,7 +128,7 @@
   {% endfor %}
 
   {# Pie #}
-  var data = {
+  var data_pie_volumes = {
       datasets: [{
           data: volumes,
           backgroundColor: volumes_background_color
@@ -136,7 +136,7 @@
       labels: volumes_labels
   }
   
-  vboa.display_pie("dhus-availability-pie-volumes", data)
+  vboa.display_pie("dhus-availability-pie-volumes", data_pie_volumes)
 
   {% endif %}
   {% endif %}
