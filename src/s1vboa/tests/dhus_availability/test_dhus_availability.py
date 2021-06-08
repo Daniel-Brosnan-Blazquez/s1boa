@@ -87,7 +87,7 @@ class TestDhusAvailabilityView(unittest.TestCase):
 
         functions.query(self.driver, wait, "S1_", start = "2021-03-16T00:00:00	", stop = "2021-03-17T23:59:59")
 
-        """ # Check summary ununexpected duration L0
+        # Check summary ununexpected duration L0
         summary_unexpected_l0 = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-available-duration-L0")))
 
         assert summary_unexpected_l0
@@ -113,7 +113,7 @@ class TestDhusAvailabilityView(unittest.TestCase):
 
         assert summary_unexpected_l2_ocn
 
-        assert summary_unexpected_l2_ocn.text == "0.0" """
+        assert summary_unexpected_l2_ocn.text == "0.0"
 
         # Check summary missing duration L0
         summary_missing_l0 = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-missing-duration-L0")))
@@ -550,34 +550,34 @@ class TestDhusAvailabilityView(unittest.TestCase):
         assert processing_data_l2a_pie_info == returned_processing_data_l2a_pie_info """
         
         # Check summary ununexpected duration L0
-        summary_unexpected_l0 = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-available-duration-L0")))
+        summary_unexpected_l0 = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-unexpected-duration-L0")))
 
         assert summary_unexpected_l0
 
         assert summary_unexpected_l0.text == "2.472"
 
         # Check summary ununexpected duration L1_SLC
-        summary_unexpected_l1_slc = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-available-duration-L1_SLC")))
+        summary_unexpected_l1_slc = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-unexpected-duration-L1_SLC")))
 
         assert summary_unexpected_l1_slc
 
         assert summary_unexpected_l1_slc.text == "2.221"
 
         # Check summary unexpected duration L1_GRD
-        summary_unexpected_l1_grd = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-available-duration-L1_GRD")))
+        summary_unexpected_l1_grd = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-unexpected-duration-L1_GRD")))
 
         assert summary_unexpected_l1_grd
 
         assert summary_unexpected_l1_grd.text == "2.562"
 
         # Check summary unexpected duration L2_OCN
-        summary_unexpected_l2_ocn = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-available-duration-L2_OCN")))
+        summary_unexpected_l2_ocn = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-unexpected-duration-L2_OCN")))
 
         assert summary_unexpected_l2_ocn
 
         assert summary_unexpected_l2_ocn.text == "1.884"
 
-        """ # Check summary expected duration L0
+        # Check summary expected duration L0
         summary_expected_l0 = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-available-duration-L0")))
 
         assert summary_expected_l0
@@ -603,8 +603,32 @@ class TestDhusAvailabilityView(unittest.TestCase):
 
         assert summary_expected_l2_ocn
 
-        assert summary_expected_l2_ocn.text == "0.0" """
+        assert summary_expected_l2_ocn.text == "0.0"
 
+        # Summary data pie L0
+        data_pie_l0 = [0, 0, 2.472]
+
+        returned_data_pie_l0 = self.driver.execute_script('return completeness.L0.slice(0, 3);')
+        assert data_pie_l0 == returned_data_pie_l0
+
+        # Summary data pie L1_SLC
+        data_pie_l1_slc = [0, 0, 2.221]
+
+        returned_data_pie_l1_slc = self.driver.execute_script('return completeness.L1_SLC.slice(0, 3);')
+        assert data_pie_l1_slc == returned_data_pie_l1_slc
+
+        # Summary data pie L1_GRD
+        data_pie_l1_grd = [0, 0, 2.562]
+
+        returned_data_pie_l1_grd = self.driver.execute_script('return completeness.L1_GRD.slice(0, 3);')
+        assert data_pie_l1_grd == returned_data_pie_l1_grd
+
+        # Summary data pie L2_OCN
+        data_pie_l2_ocn = [0, 0, 1.884]
+
+        returned_data_pie_l2_ocn = self.driver.execute_script('return completeness.L2_OCN.slice(0, 3);')
+        assert data_pie_l2_ocn == returned_data_pie_l2_ocn
+        
         # Summary data pie volumes
         data_pie_volumes = ["7.210", "18.849", "3.934"]
 
@@ -1560,31 +1584,6 @@ class TestDhusAvailabilityView(unittest.TestCase):
 
         functions.query(self.driver, wait, "S1_", start = "2021-03-16T00:00:00	", stop = "2021-03-17T23:59:59")
 
-        """ # Check summary pies
-        # L0
-        processing_data_l0_pie_info = [1,0]
-
-        returned_processing_data_l0_pie_info = self.driver.execute_script('return processing_data_l0;')
-        assert processing_data_l0_pie_info == returned_processing_data_l0_pie_info
-
-        # L1B
-        processing_data_l1b_pie_info = [1,0]
-
-        returned_processing_data_l1b_pie_info = self.driver.execute_script('return processing_data_l1b;')
-        assert processing_data_l1b_pie_info == returned_processing_data_l1b_pie_info
-
-        # L1C
-        processing_data_l1c_pie_info = [1,0]
-
-        returned_processing_data_l1c_pie_info = self.driver.execute_script('return processing_data_l1c;')
-        assert processing_data_l1c_pie_info == returned_processing_data_l1c_pie_info
-        
-        # L2A
-        processing_data_l2a_pie_info = [1,0]
-
-        returned_processing_data_l2a_pie_info = self.driver.execute_script('return processing_data_l2a;')
-        assert processing_data_l2a_pie_info == returned_processing_data_l2a_pie_info """
-        
         # Check summary expected duration L0
         summary_expected_l0 = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-available-duration-L0")))
 
@@ -1613,6 +1612,30 @@ class TestDhusAvailabilityView(unittest.TestCase):
 
         assert summary_expected_l2_ocn.text == "1.884"
 
+        # Summary data pie L0
+        data_pie_l0 = [2.472, 0, 0]
+
+        returned_data_pie_l0 = self.driver.execute_script('return completeness.L0.slice(0, 3);')
+        assert data_pie_l0 == returned_data_pie_l0
+
+        # Summary data pie L1_SLC
+        data_pie_l1_slc = [2.221, 0, 0]
+
+        returned_data_pie_l1_slc = self.driver.execute_script('return completeness.L1_SLC.slice(0, 3);')
+        assert data_pie_l1_slc == returned_data_pie_l1_slc
+
+        # Summary data pie L1_GRD
+        data_pie_l1_grd = [2.562, 0, 0]
+
+        returned_data_pie_l1_grd = self.driver.execute_script('return completeness.L1_GRD.slice(0, 3);')
+        assert data_pie_l1_grd == returned_data_pie_l1_grd
+
+        # Summary data pie L2_OCN
+        data_pie_l2_ocn = [1.884, 0, 0]
+
+        returned_data_pie_l2_ocn = self.driver.execute_script('return completeness.L2_OCN.slice(0, 3);')
+        assert data_pie_l2_ocn == returned_data_pie_l2_ocn
+        
         # Summary data pie volumes
         data_pie_volumes = ["7.210", "18.849", "3.934", "0.029"]
 
