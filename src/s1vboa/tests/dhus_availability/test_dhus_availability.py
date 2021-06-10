@@ -2572,3 +2572,1228 @@ class TestDhusAvailabilityView(unittest.TestCase):
         datatake_duration = complete_table.find_element_by_xpath("tbody/tr[4]/td[15]")
 
         assert datatake_duration.text == "7.263"
+
+    def test_dhus_availability_plan_opdhus_per_level(self):
+
+        filename = "S1A_OPER_MPL__NPPF__20210316T160000_20210405T180000_0001_SHORTENED.EOF"
+        file_path = os.path.dirname(os.path.abspath(__file__)) + "/inputs/" + filename
+
+        exit_status = ingestion.command_process_file("s1boa.ingestions.ingestion_nppf.ingestion_nppf", file_path, "2018-01-01T00:00:00")
+
+        assert len([item for item in exit_status if item["status"] != eboa_engine.exit_codes["OK"]["status"]]) == 0
+
+        filename = "DEC_OPER_OPDHUS_S1A_AUIP_20210419T135405_V20210316T000000_20210319T000000_2161_2150_SHORTENED.xml"
+        file_path = os.path.dirname(os.path.abspath(__file__)) + "/inputs/" + filename
+
+        exit_status = ingestion.command_process_file("s1boa.ingestions.ingestion_dhus_products.ingestion_dhus_products", file_path, "2018-01-01T00:00:00")
+
+        assert len([item for item in exit_status if item["status"] != eboa_engine.exit_codes["OK"]["status"]]) == 0
+
+        wait = WebDriverWait(self.driver,5)
+
+        self.driver.get("http://localhost:5000/views/dhus-availability")
+
+        ### Level L0
+        functions.query(self.driver, wait, "S1_", "L0", start = "2021-03-16T00:00:00", stop = "2021-03-17T23:59:59")
+
+        # Check summary expected duration L0
+        summary_expected_l0 = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-available-duration-L0")))
+
+        assert summary_expected_l0
+
+        assert summary_expected_l0.text == "2.472"
+
+        # Summary data pie L0
+        data_pie_l0 = [2.472, 0, 0]
+
+        returned_data_pie_l0 = self.driver.execute_script('return completeness.L0.slice(0, 3);')
+        assert data_pie_l0 == returned_data_pie_l0
+        
+        # Summary data pie volumes
+        data_pie_volumes = ["7.210"]
+
+        returned_data_pie_volumes = self.driver.execute_script('return data_pie_volumes.datasets[0].data.slice(0, 4);')
+        assert data_pie_volumes == returned_data_pie_volumes
+        
+        # Check whether the map is displayed
+        map_section = self.driver.find_element_by_id("dhus-availability-maps-section")
+
+        condition = map_section.is_displayed()
+
+        assert condition is True
+
+        l0_map_section = self.driver.find_element_by_id("dhus-availability-map-L0-section")
+
+        condition = l0_map_section.is_displayed()
+
+        assert condition is True
+
+        planned_imaging = self.query_eboa.get_events(gauge_names ={"filter": "PLANNED_IMAGING", "op":"=="},
+                                                                    start_filters =[{"date": "2021-03-17T04:10:33.066685", "op":"=="}],
+                                                                    stop_filters = [{"date": "2021-03-17T04:17:48.873819", "op": "=="}])
+
+        dhus_product_completeness_l0 = self.query_eboa.get_events(gauge_names ={"filter": "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L0", "op":"=="},
+                                                                    start_filters =[{"date": "2021-03-17T04:16:40.803000", "op":"=="}],
+                                                                    stop_filters = [{"date": "2021-03-17T04:17:14.203000", "op": "=="}])
+        
+        map_l0_tooltip_info = [
+            {
+                "id": str(dhus_product_completeness_l0[0].event_uuid),
+                "geometries": [{
+                    "name": "footprint",
+                    "type": "geometry",
+                    "value": "POLYGON ((27.694101 34.295553, 27.642358 34.072066, 27.590754 33.848562, 27.539292 33.625041, 27.487971 33.401505, 27.436734 33.177954, 27.385626 32.954387, 27.334653 32.730805, 27.283811 32.507207, 27.233047 32.283595, 24.594085 32.684286, 24.638196 32.907564, 24.682299 33.130832, 24.726466 33.354088, 24.770698 33.577332, 24.814987 33.800564, 24.859272 34.023786, 24.903625 34.246996, 24.948049 34.470194, 24.992536 34.693379, 27.694101 34.295553))"
+                }],
+                "style": {"stroke_color": "green", "fill_color": "rgba(0,255,0,0.3)"},
+                "tooltip": "<table border='1'>" + 
+                "<tr><td>Level</td><td>L0</td></tr>" + 
+                "<tr><td>Satellite</td><td>S1A</td></tr>" + 
+                "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37033.0</a></td></tr>" +
+                "<tr><td>Start</td><td>" + dhus_product_completeness_l0[0].start.isoformat() + "</td></tr>" +
+                "<tr><td>Stop</td><td>" + dhus_product_completeness_l0[0].stop.isoformat() + "</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.557</td></tr>" +
+                "<tr><td>Imaging mode</td><td>INTERFEROMETRIC_WIDE_SWATH</td></tr>" +
+                "<tr><td>Status</td><td><a class='bold-green' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>PUBLISHED</a></td></tr>" +
+                "<tr><td>Product</td><td><a href='/eboa_nav/query-event-links/" + str(dhus_product_completeness_l0[0].event_uuid) + "'>S1A_IW_RAW__0SDV_20210317T041641_20210317T041714_037033_045BC0_11CF</a></td></tr>"
+                "<tr><td>Time to DHUS publication (m)</td><td>47.712</td></tr>" +
+                "<tr><td>Size (GB)</td><td>1.664</td></tr>" + 
+                "<tr><td>Datatake id</td><td>45BC0</td></tr>" +
+                "<tr><td>Datatake start</td><td>2021-03-17T04:10:33.066685</td></tr>" +
+                "<tr><td>Datatake stop</td><td>2021-03-17T04:17:48.873819</td></tr>" +
+                "<tr><td>Datatake duration(m)</td><td>7.263</td></tr>"
+                "</table>"
+            } 
+        ]
+
+        dhus_availability_data_maps_l0 = self.driver.execute_script('return dhus_availability_data_maps["L0"].find(element => element.id === "' + str(dhus_product_completeness_l0[0].event_uuid) + '");')
+        assert dhus_availability_data_maps_l0 == map_l0_tooltip_info[0]
+        
+        # Check whether the timeliness is displayed
+        timeliness_section = self.driver.find_element_by_id("dhus-availability-timeliness-section")
+
+        condition = timeliness_section.is_displayed()
+
+        assert condition is True
+
+        l0_timeliness_section = self.driver.find_element_by_id("dhus-availability-timeliness-L0")
+
+        condition = l0_timeliness_section.is_displayed()
+
+        assert condition is True
+
+        # L0
+        # Timeliness statics
+        timeliness_average_l0 = self.driver.find_element_by_id("summary-dhus-timeliness-average-delta-to-dhus-L0")
+
+        assert timeliness_average_l0.text == "90.127"
+
+        timeliness_minimum_l0 = self.driver.find_element_by_id("summary-dhus-timeliness-minimum-delta-to-dhus-L0")
+
+        assert timeliness_minimum_l0.text == "45.065"
+
+        timeliness_maximum_l0 = self.driver.find_element_by_id("summary-dhus-timeliness-maximum-delta-to-dhus-L0")
+
+        assert timeliness_maximum_l0.text == "169.128"
+
+        timeliness_std_l0 = self.driver.find_element_by_id("summary-dhus-timeliness-std-delta-to-dhus-L0")
+
+        assert timeliness_std_l0.text == "61.160"
+
+        timeliness_l0_tooltip_info = [
+            {
+                "className": "fill-border-green",
+                "group": "S1A",
+                "id": str(dhus_product_completeness_l0[0].event_uuid),
+                "tooltip": "<table border='1'>" + 
+                "<tr><td>Level</td><td>L0</td></tr>" + 
+                "<tr><td>Satellite</td><td>S1A</td></tr>" + 
+                "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37033.0</a></td></tr>" +
+                "<tr><td>Start</td><td>" + dhus_product_completeness_l0[0].start.isoformat() + "</td></tr>" +
+                "<tr><td>Stop</td><td>" + dhus_product_completeness_l0[0].stop.isoformat() + "</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.557</td></tr>" +
+                "<tr><td>Imaging mode</td><td>INTERFEROMETRIC_WIDE_SWATH</td></tr>" +
+                "<tr><td>Status</td><td><a class='bold-green' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>PUBLISHED</a></td></tr>" +
+                "<tr><td>Product</td><td><a href='/eboa_nav/query-event-links/" + str(dhus_product_completeness_l0[0].event_uuid) + "'>S1A_IW_RAW__0SDV_20210317T041641_20210317T041714_037033_045BC0_11CF</a></td></tr>"
+                "<tr><td>Time to DHUS publication (m)</td><td>47.712</td></tr>" +
+                "<tr><td>Size (GB)</td><td>1.664</td></tr>" + 
+                "<tr><td>Datatake id</td><td>45BC0</td></tr>" +
+                "<tr><td>Datatake start</td><td>2021-03-17T04:10:33.066685</td></tr>" +
+                "<tr><td>Datatake stop</td><td>2021-03-17T04:17:48.873819</td></tr>" +
+                "<tr><td>Datatake duration(m)</td><td>7.263</td></tr>"
+                "</table>",
+                "x": "2021-03-17T04:16:40.803000",
+                "y": "47.712"
+            } 
+        ]
+
+        dhus_availability_data_timeliness_l0 = self.driver.execute_script('return dhus_availability_data_timeliness["L0"].find(element => element.id === "' + str(dhus_product_completeness_l0[0].event_uuid) + '");')
+        assert dhus_availability_data_timeliness_l0 == timeliness_l0_tooltip_info[0]
+
+        # Check whether the volumes is displayed
+        volume_section = self.driver.find_element_by_id("dhus-availability-volumes-section")
+
+        condition = volume_section.is_displayed()
+
+        assert condition is True
+
+        l0_volume_section = self.driver.find_element_by_id("dhus-availability-volumes-L0")
+
+        condition = l0_volume_section.is_displayed()
+
+        assert condition is True
+
+        # L0
+        # Volumes statics
+        volume_total_l0 = self.driver.find_element_by_id("summary-dhus-volumes-total-L0")
+
+        assert volume_total_l0.text == "7.210"
+
+        volume_average_l0 = self.driver.find_element_by_id("summary-dhus-volumes-average-L0")
+
+        assert volume_average_l0.text == "1.442"
+
+        volume_minimum_l0 = self.driver.find_element_by_id("summary-dhus-volumes-minimum-L0")
+
+        assert volume_minimum_l0.text == "0.418"
+
+        volume_maximum_l0 = self.driver.find_element_by_id("summary-dhus-volumes-maximum-L0")
+
+        assert volume_maximum_l0.text == "1.843"
+
+        volume_std_l0 = self.driver.find_element_by_id("summary-dhus-volumes-std-L0")
+
+        assert volume_std_l0.text == "0.579"
+
+
+        volume_l0_tooltip_info = [
+            {
+                "className": "fill-border-green",
+                "group": "S1A",
+                "id": str(dhus_product_completeness_l0[0].event_uuid),
+                "tooltip": "<table border='1'>" + 
+                "<tr><td>Level</td><td>L0</td></tr>" + 
+                "<tr><td>Satellite</td><td>S1A</td></tr>" + 
+                "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37033.0</a></td></tr>" +
+                "<tr><td>Start</td><td>" + dhus_product_completeness_l0[0].start.isoformat() + "</td></tr>" +
+                "<tr><td>Stop</td><td>" + dhus_product_completeness_l0[0].stop.isoformat() + "</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.557</td></tr>" +
+                "<tr><td>Imaging mode</td><td>INTERFEROMETRIC_WIDE_SWATH</td></tr>" +
+                "<tr><td>Status</td><td><a class='bold-green' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>PUBLISHED</a></td></tr>" +
+                "<tr><td>Product</td><td><a href='/eboa_nav/query-event-links/" + str(dhus_product_completeness_l0[0].event_uuid) + "'>S1A_IW_RAW__0SDV_20210317T041641_20210317T041714_037033_045BC0_11CF</a></td></tr>"
+                "<tr><td>Time to DHUS publication (m)</td><td>47.712</td></tr>" +
+                "<tr><td>Size (GB)</td><td>1.664</td></tr>" + 
+                "<tr><td>Datatake id</td><td>45BC0</td></tr>" +
+                "<tr><td>Datatake start</td><td>2021-03-17T04:10:33.066685</td></tr>" +
+                "<tr><td>Datatake stop</td><td>2021-03-17T04:17:48.873819</td></tr>" +
+                "<tr><td>Datatake duration(m)</td><td>7.263</td></tr>"
+                "</table>",
+                "x": "2021-03-17T04:16:40.803000",
+                "y": 3.341
+            } 
+        ]
+
+        dhus_availability_data_volumes_l0 = self.driver.execute_script('return dhus_availability_data_volumes["L0"].find(element => element.id === "' + str(dhus_product_completeness_l0[0].event_uuid) + '");')
+        assert dhus_availability_data_volumes_l0 == volume_l0_tooltip_info[0]
+
+        # Timeline
+        timeline_section = self.driver.find_element_by_id("dhus-availability-timeline")
+
+        condition = timeline_section.is_displayed()
+
+        assert condition is True
+        
+        dhus_product_completeness_l0 = self.query_eboa.get_events(gauge_names ={"filter": "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L0", "op":"=="},
+                                                                    start_filters =[{"date": "2021-03-17T04:16:15.803000", "op":"=="}],
+                                                                    stop_filters = [{"date": "2021-03-17T04:16:49.203000", "op": "=="}])
+        
+        timeline_l0_tooltip_info = [
+            {
+                "className": "fill-border-green",
+                "group": "S1A",
+                "id": str(dhus_product_completeness_l0[0].event_uuid),
+                "start": "2021-03-17T04:16:15.803000",
+                "stop": "2021-03-17T04:16:49.203000",
+                "timeline": "L0",
+                "tooltip": "<table border='1'>" + 
+                "<tr><td>Level</td><td>L0</td></tr>" + 
+                "<tr><td>Satellite</td><td>S1A</td></tr>" + 
+                "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37033.0</a></td></tr>" +
+                "<tr><td>Start</td><td>" + dhus_product_completeness_l0[0].start.isoformat() + "</td></tr>" +
+                "<tr><td>Stop</td><td>" + dhus_product_completeness_l0[0].stop.isoformat() + "</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.557</td></tr>" +
+                "<tr><td>Imaging mode</td><td>INTERFEROMETRIC_WIDE_SWATH</td></tr>" +
+                "<tr><td>Status</td><td><a class='bold-green' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>PUBLISHED</a></td></tr>" +
+                "<tr><td>Product</td><td><a href='/eboa_nav/query-event-links/" + str(dhus_product_completeness_l0[0].event_uuid) + "'>S1A_IW_RAW__0SDV_20210317T041616_20210317T041649_037033_045BC0_9A1C</a></td></tr>"
+                "<tr><td>Time to DHUS publication (m)</td><td>45.065</td></tr>" +
+                "<tr><td>Size (GB)</td><td>1.677</td></tr>" + 
+                "<tr><td>Datatake id</td><td>45BC0</td></tr>" +
+                "<tr><td>Datatake start</td><td>2021-03-17T04:10:33.066685</td></tr>" +
+                "<tr><td>Datatake stop</td><td>2021-03-17T04:17:48.873819</td></tr>" +
+                "<tr><td>Datatake duration(m)</td><td>7.263</td></tr>"
+                "</table>"
+            } 
+        ]
+        
+        returned_dhus_availability_data_timeline_l0 = self.driver.execute_script('return dhus_availability_data_timeline.find(element => element.id === "' + str(dhus_product_completeness_l0[0].event_uuid) + '");')
+        assert returned_dhus_availability_data_timeline_l0 == timeline_l0_tooltip_info[0]
+
+        # Check complete table
+        complete_table = self.driver.find_element_by_id("dhus-completeness-list-table-COMPLETE")
+
+        # Row 1
+        level = complete_table.find_element_by_xpath("tbody/tr[1]/td[1]")
+
+        assert level.text == "L0"
+
+        satellite = complete_table.find_element_by_xpath("tbody/tr[1]/td[2]")
+
+        assert satellite.text == "S1A"
+
+        orbit = complete_table.find_element_by_xpath("tbody/tr[1]/td[3]")
+
+        assert orbit.text == "37033.0"
+
+        start = complete_table.find_element_by_xpath("tbody/tr[1]/td[4]")
+
+        assert start.text == "2021-03-17T04:16:15.803000"
+
+        stop = complete_table.find_element_by_xpath("tbody/tr[1]/td[5]")
+
+        assert stop.text == "2021-03-17T04:16:49.203000"
+
+        duration = complete_table.find_element_by_xpath("tbody/tr[1]/td[6]")
+
+        assert duration.text == "0.557"
+
+        imaging_mode = complete_table.find_element_by_xpath("tbody/tr[1]/td[7]")
+
+        assert imaging_mode.text == "INTERFEROMETRIC_WIDE_SWATH"
+
+        status = complete_table.find_element_by_xpath("tbody/tr[1]/td[8]")
+
+        assert status.text == "PUBLISHED"
+
+        product = complete_table.find_element_by_xpath("tbody/tr[1]/td[9]")
+
+        assert product.text == "S1A_IW_RAW__0SDV_20210317T041616_20210317T041649_037033_045BC0_9A1C"
+
+        time_dhus_publication = complete_table.find_element_by_xpath("tbody/tr[1]/td[10]")
+
+        assert time_dhus_publication.text == "45.065"
+
+        size = complete_table.find_element_by_xpath("tbody/tr[1]/td[11]")
+
+        assert size.text == "1.677"
+
+        datatake_id = complete_table.find_element_by_xpath("tbody/tr[1]/td[12]")
+
+        assert datatake_id.text == "45BC0"
+
+        start = complete_table.find_element_by_xpath("tbody/tr[1]/td[13]")
+
+        assert start.text == "2021-03-17T04:10:33.066685"
+
+        stop = complete_table.find_element_by_xpath("tbody/tr[1]/td[14]")
+
+        assert stop.text == "2021-03-17T04:17:48.873819"
+
+        datatake_duration = complete_table.find_element_by_xpath("tbody/tr[1]/td[15]")
+
+        assert datatake_duration.text == "7.263"
+        
+        ### Level L1_SLC
+        functions.query(self.driver, wait, "S1_", "L1_SLC", start = "2021-03-16T00:00:00", stop = "2021-03-17T23:59:59")
+
+        # Check summary expected duration L1_SLC
+        summary_expected_l1_slc = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-available-duration-L1_SLC")))
+
+        assert summary_expected_l1_slc
+
+        assert summary_expected_l1_slc.text == "2.221"
+
+        # Summary data pie L1_SLC
+        data_pie_l1_slc = [2.221, 0, 0]
+
+        returned_data_pie_l1_slc = self.driver.execute_script('return completeness.L1_SLC.slice(0, 3);')
+        assert data_pie_l1_slc == returned_data_pie_l1_slc
+
+        # Summary data pie volumes
+        data_pie_volumes = ["18.849"]
+
+        returned_data_pie_volumes = self.driver.execute_script('return data_pie_volumes.datasets[0].data.slice(0, 4);')
+        assert data_pie_volumes == returned_data_pie_volumes
+        
+        # Check whether the map is displayed
+        map_section = self.driver.find_element_by_id("dhus-availability-maps-section")
+
+        condition = map_section.is_displayed()
+
+        assert condition is True
+
+        l1_slc_map_section = self.driver.find_element_by_id("dhus-availability-map-L1_SLC-section")
+
+        condition = l1_slc_map_section.is_displayed()
+
+        assert condition is True
+
+        dhus_product_completeness_l1_slc = self.query_eboa.get_events(gauge_names ={"filter": "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L1_SLC", "op":"=="},
+                                                                    start_filters =[{"date": "2021-03-17T04:17:08.174000", "op":"=="}],
+                                                                    stop_filters = [{"date": "2021-03-17T04:17:44.528000", "op": "=="}])
+
+        map_l1_slc_tooltip_info = [
+            {
+                "id": str(dhus_product_completeness_l1_slc[0].event_uuid),
+                "geometries": [{
+                    "name": "footprint",
+                    "type": "geometry",
+                    "value": "POLYGON ((27.315539 32.646864, 27.26576 32.427823, 27.216108 32.208767, 27.166526 31.989698, 27.117058 31.770614, 27.067712 31.551516, 27.01848 31.332403, 26.969309 31.113278, 26.920253 30.894139, 26.871312 30.674986, 26.822465 30.455819, 24.235282 30.859376, 24.278161 31.078187, 24.321068 31.296987, 24.36403 31.515777, 24.407047 31.734556, 24.450046 31.953326, 24.493096 32.172085, 24.536205 32.390833, 24.579363 32.60957, 24.62251 32.828298, 24.665719 33.047014, 27.315539 32.646864))"
+                }],
+                "style": {"stroke_color": "green", "fill_color": "rgba(0,255,0,0.3)"},
+                "tooltip": "<table border='1'>" + 
+                "<tr><td>Level</td><td>L1_SLC</td></tr>" + 
+                "<tr><td>Satellite</td><td>S1A</td></tr>" + 
+                "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37033.0</a></td></tr>" +
+                "<tr><td>Start</td><td>" + dhus_product_completeness_l1_slc[0].start.isoformat() + "</td></tr>" +
+                "<tr><td>Stop</td><td>" + dhus_product_completeness_l1_slc[0].stop.isoformat() + "</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.606</td></tr>" +
+                "<tr><td>Imaging mode</td><td>INTERFEROMETRIC_WIDE_SWATH</td></tr>" +
+                "<tr><td>Status</td><td><a class='bold-green' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>PUBLISHED</a></td></tr>" +
+                "<tr><td>Product</td><td><a href='/eboa_nav/query-event-links/" + str(dhus_product_completeness_l1_slc[0].event_uuid) + "'>S1A_IW_SLC__1SDV_20210317T041709_20210317T041744_037033_045BC0_460C</a></td></tr>"
+                "<tr><td>Time to DHUS publication (m)</td><td>458.943</td></tr>" +
+                "<tr><td>Size (GB)</td><td>5.376</td></tr>" + 
+                "<tr><td>Datatake id</td><td>45BC0</td></tr>" +
+                "<tr><td>Datatake start</td><td>2021-03-17T04:10:33.066685</td></tr>" +
+                "<tr><td>Datatake stop</td><td>2021-03-17T04:17:48.873819</td></tr>" +
+                "<tr><td>Datatake duration(m)</td><td>7.263</td></tr>"
+                "</table>"
+            } 
+        ]
+
+        dhus_availability_data_maps_l1_slc = self.driver.execute_script('return dhus_availability_data_maps["L1_SLC"].find(element => element.id === "' + str(dhus_product_completeness_l1_slc[0].event_uuid) + '");')
+        assert dhus_availability_data_maps_l1_slc == map_l1_slc_tooltip_info[0]
+
+        # Check whether the timeliness is displayed
+        timeliness_section = self.driver.find_element_by_id("dhus-availability-timeliness-section")
+
+        condition = timeliness_section.is_displayed()
+
+        assert condition is True
+
+        l1_slc_timeliness_section = self.driver.find_element_by_id("dhus-availability-timeliness-L1_SLC")
+
+        condition = l1_slc_timeliness_section.is_displayed()
+
+        assert condition is True
+
+        # L1_SLC
+        # Timeliness statics
+        timeliness_average_l1_slc = self.driver.find_element_by_id("summary-dhus-timeliness-average-delta-to-dhus-L1_SLC")
+
+        assert timeliness_average_l1_slc.text == "397.082"
+
+        timeliness_minimum_l1_slc = self.driver.find_element_by_id("summary-dhus-timeliness-minimum-delta-to-dhus-L1_SLC")
+
+        assert timeliness_minimum_l1_slc.text == "303.489"
+
+        timeliness_maximum_l1_slc = self.driver.find_element_by_id("summary-dhus-timeliness-maximum-delta-to-dhus-L1_SLC")
+
+        assert timeliness_maximum_l1_slc.text == "458.943"
+
+        timeliness_std_l1_slc = self.driver.find_element_by_id("summary-dhus-timeliness-std-delta-to-dhus-L1_SLC")
+
+        assert timeliness_std_l1_slc.text == "63.242"
+        
+        timeliness_l1_slc_tooltip_info = [
+            {
+                "className": "fill-border-green",
+                "group": "S1A",
+                "id": str(dhus_product_completeness_l1_slc[0].event_uuid),
+                "tooltip": "<table border='1'>" + 
+                "<tr><td>Level</td><td>L1_SLC</td></tr>" + 
+                "<tr><td>Satellite</td><td>S1A</td></tr>" + 
+                "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37033.0</a></td></tr>" +
+                "<tr><td>Start</td><td>" + dhus_product_completeness_l1_slc[0].start.isoformat() + "</td></tr>" +
+                "<tr><td>Stop</td><td>" + dhus_product_completeness_l1_slc[0].stop.isoformat() + "</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.606</td></tr>" +
+                "<tr><td>Imaging mode</td><td>INTERFEROMETRIC_WIDE_SWATH</td></tr>" +
+                "<tr><td>Status</td><td><a class='bold-green' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>PUBLISHED</a></td></tr>" +
+                "<tr><td>Product</td><td><a href='/eboa_nav/query-event-links/" + str(dhus_product_completeness_l1_slc[0].event_uuid) + "'>S1A_IW_SLC__1SDV_20210317T041709_20210317T041744_037033_045BC0_460C</a></td></tr>"
+                "<tr><td>Time to DHUS publication (m)</td><td>458.943</td></tr>" +
+                "<tr><td>Size (GB)</td><td>5.376</td></tr>" + 
+                "<tr><td>Datatake id</td><td>45BC0</td></tr>" +
+                "<tr><td>Datatake start</td><td>2021-03-17T04:10:33.066685</td></tr>" +
+                "<tr><td>Datatake stop</td><td>2021-03-17T04:17:48.873819</td></tr>" +
+                "<tr><td>Datatake duration(m)</td><td>7.263</td></tr>"
+                "</table>",
+                "x": "2021-03-17T04:17:08.174000",
+                "y": "458.943"
+            } 
+        ]
+
+        dhus_availability_data_timeliness_l1_slc = self.driver.execute_script('return dhus_availability_data_timeliness["L1_SLC"].find(element => element.id === "' + str(dhus_product_completeness_l1_slc[0].event_uuid) + '");')
+        assert dhus_availability_data_timeliness_l1_slc == timeliness_l1_slc_tooltip_info[0]
+        
+        # Check whether the volumes is displayed
+        volume_section = self.driver.find_element_by_id("dhus-availability-volumes-section")
+
+        condition = volume_section.is_displayed()
+
+        assert condition is True
+
+        l1_slc_volume_section = self.driver.find_element_by_id("dhus-availability-volumes-L1_SLC")
+
+        condition = l1_slc_volume_section.is_displayed()
+
+        assert condition is True
+
+        # L1_SLC
+        # Volumes statics
+        volume_total_l1_slc = self.driver.find_element_by_id("summary-dhus-volumes-total-L1_SLC")
+
+        assert volume_total_l1_slc.text == "18.849"
+
+        volume_average_l1_slc = self.driver.find_element_by_id("summary-dhus-volumes-average-L1_SLC")
+
+        assert volume_average_l1_slc.text == "3.770"
+
+        volume_minimum_l1_slc = self.driver.find_element_by_id("summary-dhus-volumes-minimum-L1_SLC")
+
+        assert volume_minimum_l1_slc.text == "1.196"
+
+        volume_maximum_l1_slc = self.driver.find_element_by_id("summary-dhus-volumes-maximum-L1_SLC")
+
+        assert volume_maximum_l1_slc.text == "5.376"
+
+        volume_std_l1_slc = self.driver.find_element_by_id("summary-dhus-volumes-std-L1_SLC")
+
+        assert volume_std_l1_slc.text == "1.545"
+        
+        volume_l1_slc_tooltip_info = [
+            {
+                "className": "fill-border-green",
+                "group": "S1A",
+                "id": str(dhus_product_completeness_l1_slc[0].event_uuid),
+                "tooltip": "<table border='1'>" + 
+                "<tr><td>Level</td><td>L1_SLC</td></tr>" + 
+                "<tr><td>Satellite</td><td>S1A</td></tr>" + 
+                "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37033.0</a></td></tr>" +
+                "<tr><td>Start</td><td>" + dhus_product_completeness_l1_slc[0].start.isoformat() + "</td></tr>" +
+                "<tr><td>Stop</td><td>" + dhus_product_completeness_l1_slc[0].stop.isoformat() + "</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.606</td></tr>" +
+                "<tr><td>Imaging mode</td><td>INTERFEROMETRIC_WIDE_SWATH</td></tr>" +
+                "<tr><td>Status</td><td><a class='bold-green' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>PUBLISHED</a></td></tr>" +
+                "<tr><td>Product</td><td><a href='/eboa_nav/query-event-links/" + str(dhus_product_completeness_l1_slc[0].event_uuid) + "'>S1A_IW_SLC__1SDV_20210317T041709_20210317T041744_037033_045BC0_460C</a></td></tr>"
+                "<tr><td>Time to DHUS publication (m)</td><td>458.943</td></tr>" +
+                "<tr><td>Size (GB)</td><td>5.376</td></tr>" + 
+                "<tr><td>Datatake id</td><td>45BC0</td></tr>" +
+                "<tr><td>Datatake start</td><td>2021-03-17T04:10:33.066685</td></tr>" +
+                "<tr><td>Datatake stop</td><td>2021-03-17T04:17:48.873819</td></tr>" +
+                "<tr><td>Datatake duration(m)</td><td>7.263</td></tr>"
+                "</table>",
+                "x": "2021-03-17T04:17:08.174000",
+                "y": 13.408000000000001
+            } 
+        ]
+
+        dhus_availability_data_volumes_l1_slc = self.driver.execute_script('return dhus_availability_data_volumes["L1_SLC"].find(element => element.id === "' + str(dhus_product_completeness_l1_slc[0].event_uuid) + '");')
+        assert dhus_availability_data_volumes_l1_slc == volume_l1_slc_tooltip_info[0]
+        
+        # Timeline
+        timeline_section = self.driver.find_element_by_id("dhus-availability-timeline")
+
+        condition = timeline_section.is_displayed()
+
+        assert condition is True
+
+        timeline_l1_slc_tooltip_info = [
+            {
+                "className": "fill-border-green",
+                "group": "S1A",
+                "id": str(dhus_product_completeness_l1_slc[0].event_uuid),
+                "start": "2021-03-17T04:17:08.174000",
+                "stop": "2021-03-17T04:17:44.528000",
+                "timeline": "L1_SLC",
+                "tooltip": "<table border='1'>" + 
+                "<tr><td>Level</td><td>L1_SLC</td></tr>" + 
+                "<tr><td>Satellite</td><td>S1A</td></tr>" + 
+                "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37033.0</a></td></tr>" +
+                "<tr><td>Start</td><td>" + dhus_product_completeness_l1_slc[0].start.isoformat() + "</td></tr>" +
+                "<tr><td>Stop</td><td>" + dhus_product_completeness_l1_slc[0].stop.isoformat() + "</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.606</td></tr>" +
+                "<tr><td>Imaging mode</td><td>INTERFEROMETRIC_WIDE_SWATH</td></tr>" +
+                "<tr><td>Status</td><td><a class='bold-green' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>PUBLISHED</a></td></tr>" +
+                "<tr><td>Product</td><td><a href='/eboa_nav/query-event-links/" + str(dhus_product_completeness_l1_slc[0].event_uuid) + "'>S1A_IW_SLC__1SDV_20210317T041709_20210317T041744_037033_045BC0_460C</a></td></tr>"
+                "<tr><td>Time to DHUS publication (m)</td><td>458.943</td></tr>" +
+                "<tr><td>Size (GB)</td><td>5.376</td></tr>" + 
+                "<tr><td>Datatake id</td><td>45BC0</td></tr>" +
+                "<tr><td>Datatake start</td><td>2021-03-17T04:10:33.066685</td></tr>" +
+                "<tr><td>Datatake stop</td><td>2021-03-17T04:17:48.873819</td></tr>" +
+                "<tr><td>Datatake duration(m)</td><td>7.263</td></tr>"
+                "</table>"
+            } 
+        ]
+        
+        returned_dhus_availability_data_timeline_l1_slc = self.driver.execute_script('return dhus_availability_data_timeline.find(element => element.id === "' + str(dhus_product_completeness_l1_slc[0].event_uuid) + '");')
+        assert returned_dhus_availability_data_timeline_l1_slc == timeline_l1_slc_tooltip_info[0]
+
+        # Check complete table
+        complete_table = self.driver.find_element_by_id("dhus-completeness-list-table-COMPLETE")
+
+        # Row 1
+        level = complete_table.find_element_by_xpath("tbody/tr[1]/td[1]")
+
+        assert level.text == "L1_SLC"
+
+        satellite = complete_table.find_element_by_xpath("tbody/tr[1]/td[2]")
+
+        assert satellite.text == "S1A"
+
+        orbit = complete_table.find_element_by_xpath("tbody/tr[1]/td[3]")
+
+        assert orbit.text == "37033.0"
+
+        start = complete_table.find_element_by_xpath("tbody/tr[1]/td[4]")
+
+        assert start.text == "2021-03-17T04:16:18.520000"
+
+        stop = complete_table.find_element_by_xpath("tbody/tr[1]/td[5]")
+
+        assert stop.text == "2021-03-17T04:16:46.604000"
+
+        duration = complete_table.find_element_by_xpath("tbody/tr[1]/td[6]")
+
+        assert duration.text == "0.468"
+
+        imaging_mode = complete_table.find_element_by_xpath("tbody/tr[1]/td[7]")
+
+        assert imaging_mode.text == "INTERFEROMETRIC_WIDE_SWATH"
+
+        status = complete_table.find_element_by_xpath("tbody/tr[1]/td[8]")
+
+        assert status.text == "PUBLISHED"
+
+        product = complete_table.find_element_by_xpath("tbody/tr[1]/td[9]")
+
+        assert product.text == "S1A_IW_SLC__1SDV_20210317T041619_20210317T041646_037033_045BC0_B8DB"
+
+        time_dhus_publication = complete_table.find_element_by_xpath("tbody/tr[1]/td[10]")
+
+        assert time_dhus_publication.text == "450.408"
+
+        size = complete_table.find_element_by_xpath("tbody/tr[1]/td[11]")
+
+        assert size.text == "4.052"
+
+        datatake_id = complete_table.find_element_by_xpath("tbody/tr[1]/td[12]")
+
+        assert datatake_id.text == "45BC0"
+
+        start = complete_table.find_element_by_xpath("tbody/tr[1]/td[13]")
+
+        assert start.text == "2021-03-17T04:10:33.066685"
+
+        stop = complete_table.find_element_by_xpath("tbody/tr[1]/td[14]")
+
+        assert stop.text == "2021-03-17T04:17:48.873819"
+
+        datatake_duration = complete_table.find_element_by_xpath("tbody/tr[1]/td[15]")
+
+        assert datatake_duration.text == "7.263"
+
+        ### Level L1_GRD
+        functions.query(self.driver, wait, "S1_", "L1_GRD", start = "2021-03-16T00:00:00", stop = "2021-03-17T23:59:59")
+        
+        # Check summary expected duration L1_GRD
+        summary_expected_l1_grd = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-available-duration-L1_GRD")))
+
+        assert summary_expected_l1_grd
+
+        assert summary_expected_l1_grd.text == "2.562"
+
+        # Summary data pie L1_GRD
+        data_pie_l1_grd = [2.562, 0, 0]
+
+        returned_data_pie_l1_grd = self.driver.execute_script('return completeness.L1_GRD.slice(0, 3);')
+        assert data_pie_l1_grd == returned_data_pie_l1_grd
+       
+        # Summary data pie volumes
+        data_pie_volumes = ["3.934"]
+
+        returned_data_pie_volumes = self.driver.execute_script('return data_pie_volumes.datasets[0].data.slice(0, 4);')
+        assert data_pie_volumes == returned_data_pie_volumes
+        
+        # Check whether the map is displayed
+        map_section = self.driver.find_element_by_id("dhus-availability-maps-section")
+
+        condition = map_section.is_displayed()
+
+        assert condition is True
+        
+        l1_grd_map_section = self.driver.find_element_by_id("dhus-availability-map-L1_GRD-section")
+
+        condition = l1_grd_map_section.is_displayed()
+
+        assert condition is True
+        
+        dhus_product_completeness_l1_grd = self.query_eboa.get_events(gauge_names ={"filter": "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L1_GRD", "op":"=="},
+                                                                    start_filters =[{"date": "2021-03-17T04:16:19.501000", "op":"=="}],
+                                                                    stop_filters = [{"date": "2021-03-17T04:16:45.499000", "op": "=="}])
+
+        map_l1_grd_tooltip_info = [
+            {
+                "id": str(dhus_product_completeness_l1_grd[0].event_uuid),
+                "geometries": [{
+                    "name": "footprint",
+                    "type": "geometry",
+                    "value": "POLYGON ((27.993583 35.578075, 27.941029 35.354507, 27.888633 35.130922, 27.836385 34.90732, 27.784233 34.683703, 27.732234 34.460069, 27.680383 34.236418, 27.628672 34.012751, 24.936282 34.41096, 24.980741 34.634324, 25.025264 34.857675, 25.069861 35.081014, 25.114533 35.304341, 25.15921 35.527656, 25.203953 35.750959, 25.248777 35.97425, 27.993583 35.578075))"
+                }],
+                "style": {"stroke_color": "green", "fill_color": "rgba(0,255,0,0.3)"},
+                "tooltip": "<table border='1'>" + 
+                "<tr><td>Level</td><td>L1_GRD</td></tr>" + 
+                "<tr><td>Satellite</td><td>S1A</td></tr>" + 
+                "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37033.0</a></td></tr>" +
+                "<tr><td>Start</td><td>" + dhus_product_completeness_l1_grd[0].start.isoformat() + "</td></tr>" +
+                "<tr><td>Stop</td><td>" + dhus_product_completeness_l1_grd[0].stop.isoformat() + "</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.433</td></tr>" +
+                "<tr><td>Imaging mode</td><td>INTERFEROMETRIC_WIDE_SWATH</td></tr>" +
+                "<tr><td>Status</td><td><a class='bold-green' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>PUBLISHED</a></td></tr>" +
+                "<tr><td>Product</td><td><a href='/eboa_nav/query-event-links/" + str(dhus_product_completeness_l1_grd[0].event_uuid) + "'>S1A_IW_GRDH_1SDV_20210317T041620_20210317T041645_037033_045BC0_8316</a></td></tr>"
+                "<tr><td>Time to DHUS publication (m)</td><td>98.605</td></tr>" +
+                "<tr><td>Size (GB)</td><td>0.848</td></tr>" + 
+                "<tr><td>Datatake id</td><td>45BC0</td></tr>" +
+                "<tr><td>Datatake start</td><td>2021-03-17T04:10:33.066685</td></tr>" +
+                "<tr><td>Datatake stop</td><td>2021-03-17T04:17:48.873819</td></tr>" +
+                "<tr><td>Datatake duration(m)</td><td>7.263</td></tr>"
+                "</table>"
+            } 
+        ]
+
+        dhus_availability_data_maps_l1_grd = self.driver.execute_script('return dhus_availability_data_maps["L1_GRD"].find(element => element.id === "' + str(dhus_product_completeness_l1_grd[0].event_uuid) + '");')
+        assert dhus_availability_data_maps_l1_grd == map_l1_grd_tooltip_info[0]
+
+        # Check whether the timeliness is displayed
+        timeliness_section = self.driver.find_element_by_id("dhus-availability-timeliness-section")
+
+        condition = timeliness_section.is_displayed()
+
+        assert condition is True
+
+        l1_grd_timeliness_section = self.driver.find_element_by_id("dhus-availability-timeliness-L1_GRD")
+
+        condition = l1_grd_timeliness_section.is_displayed()
+
+        assert condition is True
+
+        # L1_GRD
+        # Timeliness statics
+        timeliness_average_l1_grd = self.driver.find_element_by_id("summary-dhus-timeliness-average-delta-to-dhus-L1_GRD")
+
+        assert timeliness_average_l1_grd.text == "129.716"
+
+        timeliness_minimum_l1_grd = self.driver.find_element_by_id("summary-dhus-timeliness-minimum-delta-to-dhus-L1_GRD")
+
+        assert timeliness_minimum_l1_grd.text == "92.660"
+
+        timeliness_maximum_l1_grd = self.driver.find_element_by_id("summary-dhus-timeliness-maximum-delta-to-dhus-L1_GRD")
+
+        assert timeliness_maximum_l1_grd.text == "193.702"
+
+        timeliness_std_l1_grd = self.driver.find_element_by_id("summary-dhus-timeliness-std-delta-to-dhus-L1_GRD")
+
+        assert timeliness_std_l1_grd.text == "44.076"
+        
+        timeliness_l1_grd_tooltip_info = [
+            {
+                "className": "fill-border-green",
+                "group": "S1A",
+                "id": str(dhus_product_completeness_l1_grd[0].event_uuid),
+                "tooltip": "<table border='1'>" + 
+                "<tr><td>Level</td><td>L1_GRD</td></tr>" + 
+                "<tr><td>Satellite</td><td>S1A</td></tr>" + 
+                "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37033.0</a></td></tr>" +
+                "<tr><td>Start</td><td>" + dhus_product_completeness_l1_grd[0].start.isoformat() + "</td></tr>" +
+                "<tr><td>Stop</td><td>" + dhus_product_completeness_l1_grd[0].stop.isoformat() + "</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.433</td></tr>" +
+                "<tr><td>Imaging mode</td><td>INTERFEROMETRIC_WIDE_SWATH</td></tr>" +
+                "<tr><td>Status</td><td><a class='bold-green' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>PUBLISHED</a></td></tr>" +
+                "<tr><td>Product</td><td><a href='/eboa_nav/query-event-links/" + str(dhus_product_completeness_l1_grd[0].event_uuid) + "'>S1A_IW_GRDH_1SDV_20210317T041620_20210317T041645_037033_045BC0_8316</a></td></tr>"
+                "<tr><td>Time to DHUS publication (m)</td><td>98.605</td></tr>" +
+                "<tr><td>Size (GB)</td><td>0.848</td></tr>" + 
+                "<tr><td>Datatake id</td><td>45BC0</td></tr>" +
+                "<tr><td>Datatake start</td><td>2021-03-17T04:10:33.066685</td></tr>" +
+                "<tr><td>Datatake stop</td><td>2021-03-17T04:17:48.873819</td></tr>" +
+                "<tr><td>Datatake duration(m)</td><td>7.263</td></tr>"
+                "</table>",
+                "x": "2021-03-17T04:16:19.501000",
+                "y": "98.605"
+            } 
+        ]
+
+        dhus_availability_data_timeliness_l1_grd = self.driver.execute_script('return dhus_availability_data_timeliness["L1_GRD"].find(element => element.id === "' + str(dhus_product_completeness_l1_grd[0].event_uuid) + '");')
+        assert dhus_availability_data_timeliness_l1_grd == timeliness_l1_grd_tooltip_info[0]
+
+        # Check whether the volumes is displayed
+        volume_section = self.driver.find_element_by_id("dhus-availability-volumes-section")
+
+        condition = volume_section.is_displayed()
+
+        assert condition is True
+
+        l1_grd_volume_section = self.driver.find_element_by_id("dhus-availability-volumes-L1_GRD")
+
+        condition = l1_grd_volume_section.is_displayed()
+
+        assert condition is True
+
+        # L1_GRD
+        # Volumes statics
+        volume_total_l1_grd = self.driver.find_element_by_id("summary-dhus-volumes-total-L1_GRD")
+
+        assert volume_total_l1_grd.text == "3.934"
+
+        volume_average_l1_grd = self.driver.find_element_by_id("summary-dhus-volumes-average-L1_GRD")
+
+        assert volume_average_l1_grd.text == "0.656"
+
+        volume_minimum_l1_grd = self.driver.find_element_by_id("summary-dhus-volumes-minimum-L1_GRD")
+
+        assert volume_minimum_l1_grd.text == "0.071"
+
+        volume_maximum_l1_grd = self.driver.find_element_by_id("summary-dhus-volumes-maximum-L1_GRD")
+
+        assert volume_maximum_l1_grd.text == "1.087"
+
+        volume_std_l1_grd = self.driver.find_element_by_id("summary-dhus-volumes-std-L1_GRD")
+
+        assert volume_std_l1_grd.text == "0.403"
+        
+        volume_l1_grd_tooltip_info = [
+            {
+                "className": "fill-border-green",
+                "group": "S1A",
+                "id": str(dhus_product_completeness_l1_grd[0].event_uuid),
+                "tooltip": "<table border='1'>" + 
+                "<tr><td>Level</td><td>L1_GRD</td></tr>" + 
+                "<tr><td>Satellite</td><td>S1A</td></tr>" + 
+                "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37033.0</a></td></tr>" +
+                "<tr><td>Start</td><td>" + dhus_product_completeness_l1_grd[0].start.isoformat() + "</td></tr>" +
+                "<tr><td>Stop</td><td>" + dhus_product_completeness_l1_grd[0].stop.isoformat() + "</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.433</td></tr>" +
+                "<tr><td>Imaging mode</td><td>INTERFEROMETRIC_WIDE_SWATH</td></tr>" +
+                "<tr><td>Status</td><td><a class='bold-green' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>PUBLISHED</a></td></tr>" +
+                "<tr><td>Product</td><td><a href='/eboa_nav/query-event-links/" + str(dhus_product_completeness_l1_grd[0].event_uuid) + "'>S1A_IW_GRDH_1SDV_20210317T041620_20210317T041645_037033_045BC0_8316</a></td></tr>"
+                "<tr><td>Time to DHUS publication (m)</td><td>98.605</td></tr>" +
+                "<tr><td>Size (GB)</td><td>0.848</td></tr>" + 
+                "<tr><td>Datatake id</td><td>45BC0</td></tr>" +
+                "<tr><td>Datatake start</td><td>2021-03-17T04:10:33.066685</td></tr>" +
+                "<tr><td>Datatake stop</td><td>2021-03-17T04:17:48.873819</td></tr>" +
+                "<tr><td>Datatake duration(m)</td><td>7.263</td></tr>"
+                "</table>",
+                "x": "2021-03-17T04:16:19.501000",
+                "y": 1.702
+            } 
+        ]
+
+        dhus_availability_data_volumes_l1_grd = self.driver.execute_script('return dhus_availability_data_volumes["L1_GRD"].find(element => element.id === "' + str(dhus_product_completeness_l1_grd[0].event_uuid) + '");')
+        assert dhus_availability_data_volumes_l1_grd == volume_l1_grd_tooltip_info[0]
+
+        # Timeline
+        timeline_section = self.driver.find_element_by_id("dhus-availability-timeline")
+
+        condition = timeline_section.is_displayed()
+
+        assert condition is True
+
+        timeline_l1_grd_tooltip_info = [
+            {
+                "className": "fill-border-green",
+                "group": "S1A",
+                "id": str(dhus_product_completeness_l1_grd[0].event_uuid),
+                "start": "2021-03-17T04:16:19.501000",
+                "stop": "2021-03-17T04:16:45.499000",
+                "timeline": "L1_GRD",
+                "tooltip": "<table border='1'>" + 
+                "<tr><td>Level</td><td>L1_GRD</td></tr>" + 
+                "<tr><td>Satellite</td><td>S1A</td></tr>" + 
+                "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37033.0</a></td></tr>" +
+                "<tr><td>Start</td><td>" + dhus_product_completeness_l1_grd[0].start.isoformat() + "</td></tr>" +
+                "<tr><td>Stop</td><td>" + dhus_product_completeness_l1_grd[0].stop.isoformat() + "</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.433</td></tr>" +
+                "<tr><td>Imaging mode</td><td>INTERFEROMETRIC_WIDE_SWATH</td></tr>" +
+                "<tr><td>Status</td><td><a class='bold-green' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>PUBLISHED</a></td></tr>" +
+                "<tr><td>Product</td><td><a href='/eboa_nav/query-event-links/" + str(dhus_product_completeness_l1_grd[0].event_uuid) + "'>S1A_IW_GRDH_1SDV_20210317T041620_20210317T041645_037033_045BC0_8316</a></td></tr>"
+                "<tr><td>Time to DHUS publication (m)</td><td>98.605</td></tr>" +
+                "<tr><td>Size (GB)</td><td>0.848</td></tr>" + 
+                "<tr><td>Datatake id</td><td>45BC0</td></tr>" +
+                "<tr><td>Datatake start</td><td>2021-03-17T04:10:33.066685</td></tr>" +
+                "<tr><td>Datatake stop</td><td>2021-03-17T04:17:48.873819</td></tr>" +
+                "<tr><td>Datatake duration(m)</td><td>7.263</td></tr>"
+                "</table>"
+            } 
+        ]
+        
+        returned_dhus_availability_data_timeline_l1_grd = self.driver.execute_script('return dhus_availability_data_timeline.find(element => element.id === "' + str(dhus_product_completeness_l1_grd[0].event_uuid) + '");')
+        assert returned_dhus_availability_data_timeline_l1_grd == timeline_l1_grd_tooltip_info[0]
+
+        # Check complete table
+        complete_table = self.driver.find_element_by_id("dhus-completeness-list-table-COMPLETE")
+        
+        # Row 1
+        level = complete_table.find_element_by_xpath("tbody/tr[1]/td[1]")
+
+        assert level.text == "L1_GRD"
+
+        satellite = complete_table.find_element_by_xpath("tbody/tr[1]/td[2]")
+
+        assert satellite.text == "S1A"
+
+        orbit = complete_table.find_element_by_xpath("tbody/tr[1]/td[3]")
+
+        assert orbit.text == "37033.0"
+
+        start = complete_table.find_element_by_xpath("tbody/tr[1]/td[4]")
+
+        assert start.text == "2021-03-17T04:15:54.500000"
+
+        stop = complete_table.find_element_by_xpath("tbody/tr[1]/td[5]")
+
+        assert stop.text == "2021-03-17T04:16:20.500000"
+
+        duration = complete_table.find_element_by_xpath("tbody/tr[1]/td[6]")
+
+        assert duration.text == "0.433"
+
+        imaging_mode = complete_table.find_element_by_xpath("tbody/tr[1]/td[7]")
+
+        assert imaging_mode.text == "INTERFEROMETRIC_WIDE_SWATH"
+
+        status = complete_table.find_element_by_xpath("tbody/tr[1]/td[8]")
+
+        assert status.text == "PUBLISHED"
+
+        product = complete_table.find_element_by_xpath("tbody/tr[1]/td[9]")
+
+        assert product.text == "S1A_IW_GRDH_1SDV_20210317T041555_20210317T041620_037033_045BC0_4630"
+
+        time_dhus_publication = complete_table.find_element_by_xpath("tbody/tr[1]/td[10]")
+
+        assert time_dhus_publication.text == "92.66"
+
+        size = complete_table.find_element_by_xpath("tbody/tr[1]/td[11]")
+
+        assert size.text == "0.854"
+
+        datatake_id = complete_table.find_element_by_xpath("tbody/tr[1]/td[12]")
+
+        assert datatake_id.text == "45BC0"
+
+        start = complete_table.find_element_by_xpath("tbody/tr[1]/td[13]")
+
+        assert start.text == "2021-03-17T04:10:33.066685"
+
+        stop = complete_table.find_element_by_xpath("tbody/tr[1]/td[14]")
+
+        assert stop.text == "2021-03-17T04:17:48.873819"
+
+        datatake_duration = complete_table.find_element_by_xpath("tbody/tr[1]/td[15]")
+
+        assert datatake_duration.text == "7.263"
+        
+        ### Level L2_OCN
+        functions.query(self.driver, wait, "S1_", "L2_OCN", start = "2021-03-16T00:00:00", stop = "2021-03-17T23:59:59")
+
+        # Check summary expected duration L2_OCN
+        summary_expected_l2_ocn = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-available-duration-L2_OCN")))
+
+        assert summary_expected_l2_ocn
+
+        assert summary_expected_l2_ocn.text == "1.884"
+
+        # Summary data pie L2_OCN
+        data_pie_l2_ocn = [1.884, 0, 0]
+
+        returned_data_pie_l2_ocn = self.driver.execute_script('return completeness.L2_OCN.slice(0, 3);')
+        assert data_pie_l2_ocn == returned_data_pie_l2_ocn
+        
+        # Summary data pie volumes
+        data_pie_volumes = ["0.029"]
+
+        returned_data_pie_volumes = self.driver.execute_script('return data_pie_volumes.datasets[0].data.slice(0, 4);')
+        assert data_pie_volumes == returned_data_pie_volumes
+
+        # Check whether the map is displayed
+        map_section = self.driver.find_element_by_id("dhus-availability-maps-section")
+
+        condition = map_section.is_displayed()
+
+        assert condition is True
+
+        l2_ocn_map_section = self.driver.find_element_by_id("dhus-availability-map-L2_OCN-section")
+
+        condition = l2_ocn_map_section.is_displayed()
+
+        assert condition is True
+        
+        dhus_product_completeness_l2ocn = self.query_eboa.get_events(gauge_names ={"filter": "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L2_OCN", "op":"=="},
+                                                                    start_filters =[{"date": "2021-03-17T04:16:44.501000", "op":"=="}],
+                                                                    stop_filters = [{"date": "2021-03-17T04:17:10.499000", "op": "=="}])
+        
+        map_l2ocn_tooltip_info = [
+            {
+                "id": str(dhus_product_completeness_l2ocn[0].event_uuid),
+                "geometries": [{
+                    "name": "footprint",
+                    "type": "geometry",
+                    "value": "POLYGON ((27.64254 34.072855, 27.590896 33.849177, 27.539394 33.625483, 27.488033 33.401772, 27.436755 33.178048, 27.385608 32.954307, 27.334595 32.730551, 27.283714 32.506778, 24.638111 32.907136, 24.682249 33.130578, 24.72645 33.354008, 24.770716 33.577425, 24.81504 33.800832, 24.85936 34.024227, 24.903747 34.247611, 24.948206 34.470982, 27.64254 34.072855))"
+                }],
+                "style": {"stroke_color": "green", "fill_color": "rgba(0,255,0,0.3)"},
+                "tooltip": "<table border='1'>" + 
+                "<tr><td>Level</td><td>L2_OCN</td></tr>" + 
+                "<tr><td>Satellite</td><td>S1A</td></tr>" + 
+                "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37033.0</a></td></tr>" +
+                "<tr><td>Start</td><td>" + dhus_product_completeness_l2ocn[0].start.isoformat() + "</td></tr>" +
+                "<tr><td>Stop</td><td>" + dhus_product_completeness_l2ocn[0].stop.isoformat() + "</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.433</td></tr>" +
+                "<tr><td>Imaging mode</td><td>INTERFEROMETRIC_WIDE_SWATH</td></tr>" +
+                "<tr><td>Status</td><td><a class='bold-green' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>PUBLISHED</a></td></tr>" +
+                "<tr><td>Product</td><td><a href='/eboa_nav/query-event-links/" + str(dhus_product_completeness_l2ocn[0].event_uuid) + "'>S1A_IW_OCN__2SDV_20210317T041645_20210317T041710_037033_045BC0_563F</a></td></tr>"
+                "<tr><td>Time to DHUS publication (m)</td><td>69.896</td></tr>" +
+                "<tr><td>Size (GB)</td><td>0.007</td></tr>" + 
+                "<tr><td>Datatake id</td><td>45BC0</td></tr>" +
+                "<tr><td>Datatake start</td><td>2021-03-17T04:10:33.066685</td></tr>" +
+                "<tr><td>Datatake stop</td><td>2021-03-17T04:17:48.873819</td></tr>" +
+                "<tr><td>Datatake duration(m)</td><td>7.263</td></tr>"
+                "</table>"
+            } 
+        ]
+
+        dhus_availability_data_maps_l2_ocn = self.driver.execute_script('return dhus_availability_data_maps["L2_OCN"].find(element => element.id === "' + str(dhus_product_completeness_l2ocn[0].event_uuid) + '");')
+        assert dhus_availability_data_maps_l2_ocn == map_l2ocn_tooltip_info[0]
+
+        # Check whether the timeliness is displayed
+        timeliness_section = self.driver.find_element_by_id("dhus-availability-timeliness-section")
+
+        condition = timeliness_section.is_displayed()
+
+        assert condition is True
+
+        l2_ocn_timeliness_section = self.driver.find_element_by_id("dhus-availability-timeliness-L2_OCN")
+
+        condition = l2_ocn_timeliness_section.is_displayed()
+
+        assert condition is True
+        
+        # L2_OCN
+        # Timeliness statics
+        timeliness_average_l2_ocn = self.driver.find_element_by_id("summary-dhus-timeliness-average-delta-to-dhus-L2_OCN")
+
+        assert timeliness_average_l2_ocn.text == "80.450"
+
+        timeliness_minimum_l2_ocn = self.driver.find_element_by_id("summary-dhus-timeliness-minimum-delta-to-dhus-L2_OCN")
+
+        assert timeliness_minimum_l2_ocn.text == "61.287"
+
+        timeliness_maximum_l2_ocn = self.driver.find_element_by_id("summary-dhus-timeliness-maximum-delta-to-dhus-L2_OCN")
+
+        assert timeliness_maximum_l2_ocn.text == "97.950"
+
+        timeliness_std_l2_ocn = self.driver.find_element_by_id("summary-dhus-timeliness-std-delta-to-dhus-L2_OCN")
+
+        assert timeliness_std_l2_ocn.text == "17.646"
+        
+        timeliness_l2ocn_tooltip_info = [
+            {
+                "className": "fill-border-green",
+                "group": "S1A",
+                "id": str(dhus_product_completeness_l2ocn[0].event_uuid),
+                "tooltip": "<table border='1'>" + 
+                "<tr><td>Level</td><td>L2_OCN</td></tr>" + 
+                "<tr><td>Satellite</td><td>S1A</td></tr>" + 
+                "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37033.0</a></td></tr>" +
+                "<tr><td>Start</td><td>" + dhus_product_completeness_l2ocn[0].start.isoformat() + "</td></tr>" +
+                "<tr><td>Stop</td><td>" + dhus_product_completeness_l2ocn[0].stop.isoformat() + "</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.433</td></tr>" +
+                "<tr><td>Imaging mode</td><td>INTERFEROMETRIC_WIDE_SWATH</td></tr>" +
+                "<tr><td>Status</td><td><a class='bold-green' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>PUBLISHED</a></td></tr>" +
+                "<tr><td>Product</td><td><a href='/eboa_nav/query-event-links/" + str(dhus_product_completeness_l2ocn[0].event_uuid) + "'>S1A_IW_OCN__2SDV_20210317T041645_20210317T041710_037033_045BC0_563F</a></td></tr>"
+                "<tr><td>Time to DHUS publication (m)</td><td>69.896</td></tr>" +
+                "<tr><td>Size (GB)</td><td>0.007</td></tr>" + 
+                "<tr><td>Datatake id</td><td>45BC0</td></tr>" +
+                "<tr><td>Datatake start</td><td>2021-03-17T04:10:33.066685</td></tr>" +
+                "<tr><td>Datatake stop</td><td>2021-03-17T04:17:48.873819</td></tr>" +
+                "<tr><td>Datatake duration(m)</td><td>7.263</td></tr>"
+                "</table>",
+                "x": "2021-03-17T04:16:44.501000",
+                "y": "69.896"
+            } 
+        ]
+
+        dhus_availability_data_timeliness_l2_ocn = self.driver.execute_script('return dhus_availability_data_timeliness["L2_OCN"].find(element => element.id === "' + str(dhus_product_completeness_l2ocn[0].event_uuid) + '");')
+        assert dhus_availability_data_timeliness_l2_ocn == timeliness_l2ocn_tooltip_info[0]
+      
+        # Check whether the volumes is displayed
+        volume_section = self.driver.find_element_by_id("dhus-availability-volumes-section")
+
+        condition = volume_section.is_displayed()
+
+        assert condition is True
+
+        l2_ocn_volume_section = self.driver.find_element_by_id("dhus-availability-volumes-L2_OCN")
+
+        condition = l2_ocn_volume_section.is_displayed()
+
+        assert condition is True
+        
+        # L2_OCN
+        # Volumes statics
+        volume_total_l2_ocn = self.driver.find_element_by_id("summary-dhus-volumes-total-L2_OCN")
+
+        assert volume_total_l2_ocn.text == "0.029"
+
+        volume_average_l2_ocn = self.driver.find_element_by_id("summary-dhus-volumes-average-L2_OCN")
+
+        assert volume_average_l2_ocn.text == "0.007"
+
+        volume_minimum_l2_ocn = self.driver.find_element_by_id("summary-dhus-volumes-minimum-L2_OCN")
+
+        assert volume_minimum_l2_ocn.text == "0.007"
+
+        volume_maximum_l2_ocn = self.driver.find_element_by_id("summary-dhus-volumes-maximum-L2_OCN")
+
+        assert volume_maximum_l2_ocn.text == "0.008"
+
+        volume_std_l2_ocn = self.driver.find_element_by_id("summary-dhus-volumes-std-L2_OCN")
+
+        assert volume_std_l2_ocn.text == "0.001"
+        
+        volume_l2ocn_tooltip_info = [
+            {
+                "className": "fill-border-green",
+                "group": "S1A",
+                "id": str(dhus_product_completeness_l2ocn[0].event_uuid),
+                "tooltip": "<table border='1'>" + 
+                "<tr><td>Level</td><td>L2_OCN</td></tr>" + 
+                "<tr><td>Satellite</td><td>S1A</td></tr>" + 
+                "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37033.0</a></td></tr>" +
+                "<tr><td>Start</td><td>" + dhus_product_completeness_l2ocn[0].start.isoformat() + "</td></tr>" +
+                "<tr><td>Stop</td><td>" + dhus_product_completeness_l2ocn[0].stop.isoformat() + "</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.433</td></tr>" +
+                "<tr><td>Imaging mode</td><td>INTERFEROMETRIC_WIDE_SWATH</td></tr>" +
+                "<tr><td>Status</td><td><a class='bold-green' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>PUBLISHED</a></td></tr>" +
+                "<tr><td>Product</td><td><a href='/eboa_nav/query-event-links/" + str(dhus_product_completeness_l2ocn[0].event_uuid) + "'>S1A_IW_OCN__2SDV_20210317T041645_20210317T041710_037033_045BC0_563F</a></td></tr>"
+                "<tr><td>Time to DHUS publication (m)</td><td>69.896</td></tr>" +
+                "<tr><td>Size (GB)</td><td>0.007</td></tr>" + 
+                "<tr><td>Datatake id</td><td>45BC0</td></tr>" +
+                "<tr><td>Datatake start</td><td>2021-03-17T04:10:33.066685</td></tr>" +
+                "<tr><td>Datatake stop</td><td>2021-03-17T04:17:48.873819</td></tr>" +
+                "<tr><td>Datatake duration(m)</td><td>7.263</td></tr>"
+                "</table>",
+                "x": "2021-03-17T04:16:44.501000",
+                "y": 0.021
+            } 
+        ]
+
+        dhus_availability_data_volumes_l2_ocn = self.driver.execute_script('return dhus_availability_data_volumes["L2_OCN"].find(element => element.id === "' + str(dhus_product_completeness_l2ocn[0].event_uuid) + '");')
+        assert dhus_availability_data_volumes_l2_ocn == volume_l2ocn_tooltip_info[0]
+
+        # Timeline
+        timeline_section = self.driver.find_element_by_id("dhus-availability-timeline")
+
+        condition = timeline_section.is_displayed()
+
+        assert condition is True
+
+        timeline_l2_ocn_tooltip_info = [
+            {
+                "className": "fill-border-green",
+                "group": "S1A",
+                "id": str(dhus_product_completeness_l2ocn[0].event_uuid),
+                "start": "2021-03-17T04:16:44.501000",
+                "stop": "2021-03-17T04:17:10.499000",
+                "timeline": "L2_OCN",
+                "tooltip": "<table border='1'>" + 
+                "<tr><td>Level</td><td>L2_OCN</td></tr>" + 
+                "<tr><td>Satellite</td><td>S1A</td></tr>" + 
+                "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37033.0</a></td></tr>" +
+                "<tr><td>Start</td><td>" + dhus_product_completeness_l2ocn[0].start.isoformat() + "</td></tr>" +
+                "<tr><td>Stop</td><td>" + dhus_product_completeness_l2ocn[0].stop.isoformat() + "</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.433</td></tr>" +
+                "<tr><td>Imaging mode</td><td>INTERFEROMETRIC_WIDE_SWATH</td></tr>" +
+                "<tr><td>Status</td><td><a class='bold-green' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>PUBLISHED</a></td></tr>" +
+                "<tr><td>Product</td><td><a href='/eboa_nav/query-event-links/" + str(dhus_product_completeness_l2ocn[0].event_uuid) + "'>S1A_IW_OCN__2SDV_20210317T041645_20210317T041710_037033_045BC0_563F</a></td></tr>"
+                "<tr><td>Time to DHUS publication (m)</td><td>69.896</td></tr>" +
+                "<tr><td>Size (GB)</td><td>0.007</td></tr>" + 
+                "<tr><td>Datatake id</td><td>45BC0</td></tr>" +
+                "<tr><td>Datatake start</td><td>2021-03-17T04:10:33.066685</td></tr>" +
+                "<tr><td>Datatake stop</td><td>2021-03-17T04:17:48.873819</td></tr>" +
+                "<tr><td>Datatake duration(m)</td><td>7.263</td></tr>"
+                "</table>"
+            } 
+        ]
+        
+        returned_dhus_availability_data_timeline_l2_ocn = self.driver.execute_script('return dhus_availability_data_timeline.find(element => element.id === "' + str(dhus_product_completeness_l2ocn[0].event_uuid) + '");')
+        assert returned_dhus_availability_data_timeline_l2_ocn == timeline_l2_ocn_tooltip_info[0]
+        
+        # Check complete table
+        complete_table = self.driver.find_element_by_id("dhus-completeness-list-table-COMPLETE")
+
+        # Row 1
+        level = complete_table.find_element_by_xpath("tbody/tr[1]/td[1]")
+
+        assert level.text == "L2_OCN"
+
+        satellite = complete_table.find_element_by_xpath("tbody/tr[1]/td[2]")
+
+        assert satellite.text == "S1A"
+
+        orbit = complete_table.find_element_by_xpath("tbody/tr[1]/td[3]")
+
+        assert orbit.text == "37033.0"
+
+        start = complete_table.find_element_by_xpath("tbody/tr[1]/td[4]")
+
+        assert start.text == "2021-03-17T04:15:54.500000"
+
+        stop = complete_table.find_element_by_xpath("tbody/tr[1]/td[5]")
+
+        assert stop.text == "2021-03-17T04:16:20.500000"
+
+        duration = complete_table.find_element_by_xpath("tbody/tr[1]/td[6]")
+
+        assert duration.text == "0.433"
+
+        imaging_mode = complete_table.find_element_by_xpath("tbody/tr[1]/td[7]")
+
+        assert imaging_mode.text == "INTERFEROMETRIC_WIDE_SWATH"
+
+        status = complete_table.find_element_by_xpath("tbody/tr[1]/td[8]")
+
+        assert status.text == "PUBLISHED"
+
+        product = complete_table.find_element_by_xpath("tbody/tr[1]/td[9]")
+
+        assert product.text == "S1A_IW_OCN__2SDV_20210317T041555_20210317T041620_037033_045BC0_015F"
+
+        time_dhus_publication = complete_table.find_element_by_xpath("tbody/tr[1]/td[10]")
+
+        assert time_dhus_publication.text == "61.287"
+
+        size = complete_table.find_element_by_xpath("tbody/tr[1]/td[11]")
+
+        assert size.text == "0.007"
+
+        datatake_id = complete_table.find_element_by_xpath("tbody/tr[1]/td[12]")
+
+        assert datatake_id.text == "45BC0"
+
+        start = complete_table.find_element_by_xpath("tbody/tr[1]/td[13]")
+
+        assert start.text == "2021-03-17T04:10:33.066685"
+
+        stop = complete_table.find_element_by_xpath("tbody/tr[1]/td[14]")
+
+        assert stop.text == "2021-03-17T04:17:48.873819"
+
+        datatake_duration = complete_table.find_element_by_xpath("tbody/tr[1]/td[15]")
+
+        assert datatake_duration.text == "7.263"

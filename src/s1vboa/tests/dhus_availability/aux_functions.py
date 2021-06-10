@@ -19,7 +19,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver import ActionChains,TouchActions
 from selenium.webdriver.common.keys import Keys
 
-def query(driver, wait, mission = None, start = None, stop = None, start_orbit = None, stop_orbit = None, table_details = True, map = True, station_reports = True):
+def query(driver, wait, mission = None, level = None, start = None, stop = None, start_orbit = None, stop_orbit = None, table_details = True, map = True, station_reports = True):
 
     query_interface = driver.find_element_by_partial_link_text("Query interface")
     i = 0
@@ -33,6 +33,11 @@ def query(driver, wait, mission = None, start = None, stop = None, start_orbit =
     if mission is not None:
         mission_select = Select(driver.find_element_by_id("mission_static_query"))
         mission_select.select_by_visible_text(mission)
+
+    # Extend level selector and choose level
+    if level is not None:
+        level_select = Select(driver.find_element_by_id("levels-static-query"))
+        level_select.select_by_visible_text(level)
 
     if start is not None:
         # Select start date
