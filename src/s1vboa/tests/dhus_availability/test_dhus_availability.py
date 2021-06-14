@@ -548,31 +548,6 @@ class TestDhusAvailabilityView(unittest.TestCase):
 
         functions.query(self.driver, wait, "S1_", start = "2021-03-17T00:00:00", stop = "2021-03-17T23:59:59")
 
-        """ # Check summary pies
-        # L0
-        processing_data_l0_pie_info = [1,0]
-
-        returned_processing_data_l0_pie_info = self.driver.execute_script('return processing_data_l0;')
-        assert processing_data_l0_pie_info == returned_processing_data_l0_pie_info
-
-        # L1B
-        processing_data_l1b_pie_info = [1,0]
-
-        returned_processing_data_l1b_pie_info = self.driver.execute_script('return processing_data_l1b;')
-        assert processing_data_l1b_pie_info == returned_processing_data_l1b_pie_info
-
-        # L1C
-        processing_data_l1c_pie_info = [1,0]
-
-        returned_processing_data_l1c_pie_info = self.driver.execute_script('return processing_data_l1c;')
-        assert processing_data_l1c_pie_info == returned_processing_data_l1c_pie_info
-        
-        # L2A
-        processing_data_l2a_pie_info = [1,0]
-
-        returned_processing_data_l2a_pie_info = self.driver.execute_script('return processing_data_l2a;')
-        assert processing_data_l2a_pie_info == returned_processing_data_l2a_pie_info """
-        
         # Check summary ununexpected duration L0
         summary_unexpected_l0 = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-unexpected-duration-L0")))
 
