@@ -47,20 +47,20 @@ Group of events
 <!-- Complete route with the view content -->
 {% if data["metadata"]["view_content"] == "completeness" %}
 {% set view = "?view=completeness" %}
-{% set title = "completeness from planning view" %}
+{% set show_title = "completeness from planning view" %}
 {% elif data["metadata"]["view_content"] == "timeliness" %}
 {% set view = "?view=timeliness" %}
-{% set title = "timeliness from planning view" %}
+{% set show_title = "timeliness from planning view" %}
 {% elif data["metadata"]["view_content"] == "volumes" %}
 {% set view = "?view=volumes" %}
-{% set title = "data volumes view" %}
+{% set show_title = "data volumes view" %}
 {% else %}
-{% set title = "completeness and timeliness from planning and data volumes view" %}
+{% set show_title = "completeness and timeliness from planning and data volumes view" %}
 {% endif %}
 
 {% block content %}
 <div class="row">
-  <h1 class="page-header">Data Availability in DHUS, {{ title }}</h1>
+  <h1 class="page-header">{{ data["metadata"]["view_title"] }}, {{ show_title }}</h1>
 </div>
 <!-- /.row -->
 

@@ -261,7 +261,11 @@ def query_dhus_availability_and_render(start_filter, stop_filter, mission, level
     
     route = "views/dhus_availability/dhus_availability.html"
     if planned_imaging_uuid != None:
-        route = "views/dhus_availability/dhus_availability_datatake.html"
+        metadata["view_title"] = "Specific datatake availability in DHUS"
+        metadata["pagination"] = False
+    else:
+        metadata["view_title"] = "Data Availability in DHUS"
+        metadata["pagination"] = True
     # end if
 
     if view_content == "completeness":

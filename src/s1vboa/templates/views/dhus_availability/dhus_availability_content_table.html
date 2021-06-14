@@ -5,7 +5,13 @@
         {% if type_of_table == "COMPLETE" %}
         <a data-toggle="collapse" data-parent="#accordion" href="#dhus-completeness-list-{{ type_of_table }}">Data availability in DHUS <span class="fa fa-angle-double-down"></span></a>
         {% else %}
-        {% set list_products_completeness = missing_dhus_products["L0"] + missing_dhus_products["L1_SLC"] + missing_dhus_products["L1_GRD"] + missing_dhus_products["L2_OCN"] %}
+        {% set list_products_completeness_aux = [] %}
+        {% for level in parsed_levels[0] %}
+        {% if level in parsed_levels[0] and (expected_dhus_products_duration[level] > 0 or unexpected_dhus_products_duration[level] > 0) %}
+        {% do list_products_completeness_aux.append(missing_dhus_products[level]) %}
+        {% endif %}
+        {% endfor %}
+        {% set list_products_completeness = list_products_completeness_aux|flatten %}
         <a data-toggle="collapse" data-parent="#accordion" href="#dhus-completeness-list-{{ type_of_table }}" style="color:red">Missing products in DHUS <span class="fa fa-angle-double-down"></span></a>
         {% endif %}
       </h3>
