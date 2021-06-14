@@ -43,9 +43,6 @@ def show_dhus_availability():
     filters["offset"] = [""]
 
     view_content = request.args.get("view")    
-    if "template" in filters:
-        template_name = filters["template"][0]
-    # end if
 
     # Initialize reporting period (now - 1 days, now)
     start_filter = {
