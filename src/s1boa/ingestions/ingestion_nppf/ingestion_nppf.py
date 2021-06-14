@@ -298,7 +298,7 @@ def _generate_imaging_events(xpath_xml, source, events_per_imaging_mode, complet
 
         if start > stop:
             start = imaging_start
-            stop = imaging_start
+            stop = (imaging_start_datetime + datetime.timedelta(seconds=1)).isoformat()
         # end if
 
         # DHUS product completeness events

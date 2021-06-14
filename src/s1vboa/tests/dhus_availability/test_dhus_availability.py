@@ -88,19 +88,19 @@ class TestDhusAvailabilityView(unittest.TestCase):
         functions.query(self.driver, wait, "S1_", start = "2021-03-16T00:00:00	", stop = "2021-03-17T23:59:59")
 
         # Summary data pie L0
-        data_pie_l0 = [0, 11.479, 0]
+        data_pie_l0 = [0, 11.529, 0]
 
         returned_data_pie_l0 = self.driver.execute_script('return completeness.L0.slice(0, 3);')
         assert data_pie_l0 == returned_data_pie_l0
 
         # Summary data pie L1_SLC
-        data_pie_l1_slc = [0, 22.375, 0]
+        data_pie_l1_slc = [0, 22.425, 0]
 
         returned_data_pie_l1_slc = self.driver.execute_script('return completeness.L1_SLC.slice(0, 3);')
         assert data_pie_l1_slc == returned_data_pie_l1_slc
 
         # Summary data pie L1_GRD
-        data_pie_l1_grd = [0, 11.479, 0]
+        data_pie_l1_grd = [0, 11.529, 0]
 
         returned_data_pie_l1_grd = self.driver.execute_script('return completeness.L1_GRD.slice(0, 3);')
         assert data_pie_l1_grd == returned_data_pie_l1_grd
@@ -144,21 +144,21 @@ class TestDhusAvailabilityView(unittest.TestCase):
 
         assert summary_missing_l0
 
-        assert summary_missing_l0.text == "11.479"
+        assert summary_missing_l0.text == "11.529"
 
         # Check summary missing duration L1_SLC
         summary_missing_l1_slc = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-missing-duration-L1_SLC")))
 
         assert summary_missing_l1_slc
 
-        assert summary_missing_l1_slc.text == "22.375"
+        assert summary_missing_l1_slc.text == "22.425"
 
         # Check summary missing duration L1_GRD
         summary_missing_l1_grd = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-missing-duration-L1_GRD")))
 
         assert summary_missing_l1_grd
 
-        assert summary_missing_l1_grd.text == "11.479"
+        assert summary_missing_l1_grd.text == "11.529"
 
        # Check summary missing duration L2_OCN
         summary_missing_l2_ocn = wait.until(EC.visibility_of_element_located((By.ID,"summary-dhus-completeness-missing-duration-L2_OCN")))
@@ -244,7 +244,7 @@ class TestDhusAvailabilityView(unittest.TestCase):
         
         dhus_product_completeness_l1_slc = self.query_eboa.get_events(gauge_names ={"filter": "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L1_SLC", "op":"=="},
                                                                     start_filters =[{"date": "2021-03-16T18:36:27.354551", "op":"=="}],
-                                                                    stop_filters = [{"date": "2021-03-16T18:36:27.354551", "op": "=="}])
+                                                                    stop_filters = [{"date": "2021-03-16T18:36:28.354551", "op": "=="}])
 
         map_l1_slc_tooltip_info = [
             {
@@ -252,7 +252,7 @@ class TestDhusAvailabilityView(unittest.TestCase):
                 "geometries": [{
                     "name": "footprint",
                     "type": "geometry",
-                    "value": "POLYGON ((165.852559 -9.933427, 165.131247 -9.770303999999999, 165.131247 -9.770303999999999, 165.852559 -9.933427))"
+                    "value": "POLYGON ((165.838804 -9.993728000000001, 165.117361 -9.830536, 165.117361 -9.830536, 165.838804 -9.993728000000001))"
                 }],
                 "style": {"stroke_color": "red", "fill_color": "rgba(255,0,0,0.3)"},
                 "tooltip": "<table border='1'>" + 
@@ -261,7 +261,7 @@ class TestDhusAvailabilityView(unittest.TestCase):
                 "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37027.0</a></td></tr>" +
                 "<tr><td>Start</td><td>" + dhus_product_completeness_l1_slc[0].start.isoformat() + "</td></tr>" +
                 "<tr><td>Stop</td><td>" + dhus_product_completeness_l1_slc[0].stop.isoformat() + "</td></tr>" +
-                "<tr><td>Duration (m)</td><td>0.0</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.017</td></tr>" +
                 "<tr><td>Imaging mode</td><td>STRIPMAP4_WITHOUT_CALIBRATION</td></tr>" +
                 "<tr><td>Status</td><td><a class='bold-red' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>MISSING</a></td></tr>" +
                 "<tr><td>Product</td><td><a class='bold-red'>N/A</a></td></tr>"
@@ -3839,7 +3839,7 @@ class TestDhusAvailabilityView(unittest.TestCase):
         functions.query(self.driver, wait, "S1_", "L0", start = "2021-03-16T00:00:00", stop = "2021-03-17T23:59:59")
 
         # Summary data pie L0
-        data_pie_l0 = [0, 11.479, 0]
+        data_pie_l0 = [0, 11.529, 0]
 
         returned_data_pie_l0 = self.driver.execute_script('return completeness.L0.slice(0, 3);')
         assert data_pie_l0 == returned_data_pie_l0
@@ -3856,7 +3856,7 @@ class TestDhusAvailabilityView(unittest.TestCase):
 
         assert summary_missing_l0
 
-        assert summary_missing_l0.text == "11.479"
+        assert summary_missing_l0.text == "11.529"
         
         # Check whether the map is displayed
         map_section = self.driver.find_element_by_id("dhus-availability-maps-section")
@@ -4082,7 +4082,7 @@ class TestDhusAvailabilityView(unittest.TestCase):
         functions.query(self.driver, wait, "S1_", "L1_SLC", start = "2021-03-16T00:00:00", stop = "2021-03-17T23:59:59")
 
         # Summary data pie L1_SLC
-        data_pie_l1_slc = [0, 22.375, 0]
+        data_pie_l1_slc = [0, 22.425, 0]
 
         returned_data_pie_l1_slc = self.driver.execute_script('return completeness.L1_SLC.slice(0, 3);')
         assert data_pie_l1_slc == returned_data_pie_l1_slc
@@ -4099,7 +4099,7 @@ class TestDhusAvailabilityView(unittest.TestCase):
 
         assert summary_missing_l1_slc
 
-        assert summary_missing_l1_slc.text == "22.375"
+        assert summary_missing_l1_slc.text == "22.425"
 
         # Check whether the map is displayed
         map_section = self.driver.find_element_by_id("dhus-availability-maps-section")
@@ -4119,7 +4119,7 @@ class TestDhusAvailabilityView(unittest.TestCase):
         
         dhus_product_completeness_l1_slc = self.query_eboa.get_events(gauge_names ={"filter": "PLANNED_IMAGING_DHUS_PRODUCT_COMPLETENESS_L1_SLC", "op":"=="},
                                                                     start_filters =[{"date": "2021-03-16T18:36:27.354551", "op":"=="}],
-                                                                    stop_filters = [{"date": "2021-03-16T18:36:27.354551", "op": "=="}])
+                                                                    stop_filters = [{"date": "2021-03-16T18:36:28.354551", "op": "=="}])
 
         map_l1_slc_tooltip_info = [
             {
@@ -4127,7 +4127,7 @@ class TestDhusAvailabilityView(unittest.TestCase):
                 "geometries": [{
                     "name": "footprint",
                     "type": "geometry",
-                    "value": "POLYGON ((165.852559 -9.933427, 165.131247 -9.770303999999999, 165.131247 -9.770303999999999, 165.852559 -9.933427))"
+                    "value": "POLYGON ((165.838804 -9.993728000000001, 165.117361 -9.830536, 165.117361 -9.830536, 165.838804 -9.993728000000001))"
                 }],
                 "style": {"stroke_color": "red", "fill_color": "rgba(255,0,0,0.3)"},
                 "tooltip": "<table border='1'>" + 
@@ -4136,7 +4136,7 @@ class TestDhusAvailabilityView(unittest.TestCase):
                 "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37027.0</a></td></tr>" +
                 "<tr><td>Start</td><td>" + dhus_product_completeness_l1_slc[0].start.isoformat() + "</td></tr>" +
                 "<tr><td>Stop</td><td>" + dhus_product_completeness_l1_slc[0].stop.isoformat() + "</td></tr>" +
-                "<tr><td>Duration (m)</td><td>0.0</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.017</td></tr>" +
                 "<tr><td>Imaging mode</td><td>STRIPMAP4_WITHOUT_CALIBRATION</td></tr>" +
                 "<tr><td>Status</td><td><a class='bold-red' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>MISSING</a></td></tr>" +
                 "<tr><td>Product</td><td><a class='bold-red'>N/A</a></td></tr>"
@@ -4166,7 +4166,7 @@ class TestDhusAvailabilityView(unittest.TestCase):
                 "id": str(dhus_product_completeness_l1_slc[0].event_uuid),
                 
                 "start": "2021-03-16T18:36:27.354551",
-                "stop": "2021-03-16T18:36:27.354551",
+                "stop": "2021-03-16T18:36:28.354551",
                 "timeline": "L1_SLC",
                 "tooltip": "<table border='1'>" + 
                 "<tr><td>Level</td><td>L1_SLC</td></tr>" + 
@@ -4174,7 +4174,7 @@ class TestDhusAvailabilityView(unittest.TestCase):
                 "<tr><td>Orbit</td><td><a href='/eboa_nav/query-event-links/" + str(planned_imaging[0].event_uuid) + "'>37027.0</a></td></tr>" +
                 "<tr><td>Start</td><td>" + dhus_product_completeness_l1_slc[0].start.isoformat() + "</td></tr>" +
                 "<tr><td>Stop</td><td>" + dhus_product_completeness_l1_slc[0].stop.isoformat() + "</td></tr>" +
-                "<tr><td>Duration (m)</td><td>0.0</td></tr>" +
+                "<tr><td>Duration (m)</td><td>0.017</td></tr>" +
                 "<tr><td>Imaging mode</td><td>STRIPMAP4_WITHOUT_CALIBRATION</td></tr>" +
                 "<tr><td>Status</td><td><a class='bold-red' href='/views/dhus-availability-by-datatake/" + str(planned_imaging[0].event_uuid) + "'>MISSING</a></td></tr>" +
                 "<tr><td>Product</td><td><a class='bold-red'>N/A</a></td></tr>"
@@ -4323,7 +4323,7 @@ class TestDhusAvailabilityView(unittest.TestCase):
         functions.query(self.driver, wait, "S1_", "L1_GRD", start = "2021-03-16T00:00:00", stop = "2021-03-17T23:59:59")
         
         # Summary data pie L1_GRD
-        data_pie_l1_grd = [0, 11.479, 0]
+        data_pie_l1_grd = [0, 11.529, 0]
 
         returned_data_pie_l1_grd = self.driver.execute_script('return completeness.L1_GRD.slice(0, 3);')
         assert data_pie_l1_grd == returned_data_pie_l1_grd
@@ -4340,7 +4340,7 @@ class TestDhusAvailabilityView(unittest.TestCase):
 
         assert summary_missing_l1_grd
 
-        assert summary_missing_l1_grd.text == "11.479"
+        assert summary_missing_l1_grd.text == "11.529"
         
         # Check whether the map is displayed
         map_section = self.driver.find_element_by_id("dhus-availability-maps-section")

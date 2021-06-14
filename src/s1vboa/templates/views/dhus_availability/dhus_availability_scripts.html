@@ -10,7 +10,7 @@
 
   {# Timeliness #}
   {% for level in parsed_levels[0] %}
-  {% if level in parsed_levels[0] and (expected_generated_dhus_products_duration[level] > 0 or unexpected_dhus_products_duration[level] > 0) %}
+  {% if expected_generated_dhus_products_duration[level] > 0 or unexpected_dhus_products_duration[level] > 0 %}
 
   var groups = [];
   var items = [];
@@ -61,7 +61,7 @@
   {% for level in parsed_levels[0] %}
 
   {# Pie completeness #}
-  {% if level in parsed_levels[0] and (expected_dhus_products_duration[level] > 0 or unexpected_dhus_products_duration[level] > 0) %}
+  {% if expected_dhus_products_duration[level] > 0 or unexpected_dhus_products_duration[level] > 0 %}
   completeness["{{ level }}"]  = [{{ expected_generated_dhus_products_duration[level]|round(3) }}, {{ missing_dhus_products_duration[level]|round(3) }}, {{ unexpected_dhus_products_duration[level]|round(3) }}]
   completeness_background_color["{{ level }}"]  = ["green", "darkred", "darkblue"]
   completeness_labels["{{ level }}"]  = ["{{ level }} expected available in DHUS", "{{ level }} missing in DHUS", "{{ level }} unexpected available in DHUS"]
@@ -109,7 +109,7 @@
 
   {# XY graphs #}
   {% for level in parsed_levels[0] %}
-  {% if level in parsed_levels[0] and (expected_generated_dhus_products_duration[level] > 0 or unexpected_dhus_products_duration[level] > 0) %}
+  {% if expected_generated_dhus_products_duration[level] > 0 or unexpected_dhus_products_duration[level] > 0 %}
 
   {# Statistics #}
   var total_dom = document.getElementById("summary-dhus-volumes-total-{{ level }}");
@@ -151,10 +151,11 @@
   
   {% if sliding_window %}
   var parameters = {
-      "window_delay": "{{ sliding_window['window_delay'] }}",
-      "window_size": "{{ sliding_window['window_size'] }}",
-      "mission": "{{ sliding_window['mission'] }}",
-      "levels": "{{ sliding_window['levels'] }}"
+  "window_delay": "{{ sliding_window['window_delay'] }}",
+  "window_size": "{{ sliding_window['window_size'] }}",
+  "mission": "{{ sliding_window['mission'] }}",
+  "levels": "{{ sliding_window['levels'] }}",
+  "view_content": "{{ sliding_window['view_content'] }}"
   }
   var repeat_cycle = {{ sliding_window['repeat_cycle'] }}
   vboa.update_view(parameters, repeat_cycle, "/views/sliding-dhus-availability-parameters");

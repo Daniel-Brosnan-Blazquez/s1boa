@@ -125,7 +125,7 @@ def show_specific_datatake(planned_imaging_uuid):
     return query_dhus_availability_and_render(start_filter, stop_filter, mission, levels, filters = filters, planned_imaging_uuid = planned_imaging_uuid)
 
 @bp.route("/dhus-availability-pages", methods=["POST"])
-def query_dhus_availability_pages():
+def show_dhus_availability_pages():
     """
     DHUS availability view for the Sentinel-1 mission using pages.
     """
@@ -153,7 +153,7 @@ def show_sliding_dhus_availability_parameters():
     window_size = float(request.args.get("window_size"))
     repeat_cycle = float(request.args.get("repeat_cycle"))
     mission = request.args.get("mission")
-    view_content = request.args.get("view")
+    view_content = request.args.get("view_content")
     
     levels = "ALL"
     if request.args.get("levels") != "":
@@ -175,10 +175,11 @@ def show_sliding_dhus_availability_parameters():
         "window_size": window_size,
         "repeat_cycle": repeat_cycle,
         "mission": mission,
-        "levels": levels
+        "levels": levels,
+        "view_content": view_content
     }
 
-    return query_dhus_availability_and_render(start_filter, stop_filter, mission, levels, sliding_window)
+    return query_dhus_availability_and_render(start_filter, stop_filter, mission, levels, sliding_window, view_content = view_content)
 
 @bp.route("/sliding-dhus-availability", methods=["GET", "POST"])
 def show_sliding_dhus_availability():
@@ -193,6 +194,7 @@ def show_sliding_dhus_availability():
 
     mission = "S1_"
     levels = "ALL"
+    view_content = "all"
     
     if request.method == "POST":
 
@@ -216,8 +218,8 @@ def show_sliding_dhus_availability():
             repeat_cycle = float(request.form["dhus_availability_repeat_cycle"])
         # end if
 
-        if request.form["view_content"] != "":
-            view_content = request.form["view_content"]
+        if request.form["dhus_availability_view_content"] != "":
+            view_content = request.form["dhus_availability_view_content"]
         # end if
 
     # end if
@@ -240,7 +242,7 @@ def show_sliding_dhus_availability():
         "view_content": view_content
     }
 
-    return query_dhus_availability_and_render(start_filter, stop_filter, mission, levels, sliding_window)
+    return query_dhus_availability_and_render(start_filter, stop_filter, mission, levels, sliding_window, view_content = view_content)
 
 def query_dhus_availability_and_render(start_filter, stop_filter, mission, levels, sliding_window = None, filters = None, planned_imaging_uuid = None, view_content = None):
 

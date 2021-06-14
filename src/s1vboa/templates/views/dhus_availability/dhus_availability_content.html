@@ -4,9 +4,11 @@
 {% include "views/common/header.html" %}
 
 <!-- Pagination -->
-{% with route = "/views/dhus-availability-pages", elements = data["event_groups"]["planned_imaging"], filters = filters %}
+{% if data["metadata"]["pagination"] %}
+{% with route = "/views/dhus-availability-pages", elements = list_products_completeness, filters = filters %}
 {% include "vboa/pagination.html" %}
 {% endwith %}
+{% endif %}
 
 <!-- Content -->
 {% if list_products_completeness|length > 0 %}

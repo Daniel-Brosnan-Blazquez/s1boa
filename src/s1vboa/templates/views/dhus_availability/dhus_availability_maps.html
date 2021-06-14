@@ -9,6 +9,7 @@
     <div class="panel-body panel-collapse collapse in" id="dhus-availability-maps-section">
       <!-- Map completeness -->
       {% for level in parsed_levels[0] %}
+      {% if expected_dhus_products_duration[level] > 0 or unexpected_dhus_products_duration[level] > 0 %}
       <div class="col-xs-6">
         <div class="panel panel-default">
           <div class="panel-heading">
@@ -22,6 +23,7 @@
           </div>
         </div>
       </div>
+      {% endif %}
       {% endfor %}
     </div>
   </div>
