@@ -4,8 +4,19 @@
 {% endblock %}
 {% block project_version %}S1BOA 1.0.0{% endblock %}
 {% block project_header %}
-<!-- Logo is exported with a heigth of 80 pixels -->
-<div style="display:inline"><a href="/s1_static_images/Sentinel1.png"><img style="text-align:center" src="/s1_static_images/Sentinel1_page_logo.png"/></a></div>
+<!-- Logo is exported with a heigth of 60 pixels -->
+<div style="background-color: #00d6a8ff; width:100%">
+  <div style="text-align:left; width: calc(99% / 3); display: inline-block">
+    <img src="/s1_static_images/copernicus.png"/>
+  </div>
+  <div style="text-align:center; width: calc(99% / 3); display: inline-block">
+    <img src="/s1_static_images/sentinel1.png"/>
+  </div>
+  <div style="text-align:right; width: calc(99% / 3); display: inline-block">
+    <img src="/s1_static_images/esa.png"/>
+    <img src="/s1_static_images/eu_comission.png"/>
+  </div>
+</div>
 {% endblock %}
 {% block side_panel_plugins %}
 <li>
