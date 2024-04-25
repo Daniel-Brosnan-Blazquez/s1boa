@@ -90,7 +90,7 @@ class TestEngine(unittest.TestCase):
         filters["severities"] = {"filter": "fatal", "op": "=="}
         filters["generators"] = {"filter": "ingestion_nppf.py", "op": "=="}
         filters["order_by"] = {"field": "notification_time", "descending": False}
-        alerts_planned_imaging = self.query_eboa.get_event_alerts(filters)
+        alerts_planned_imaging = self.query_eboa.get_event_alerts(**filters)
 
         assert len(alerts_planned_imaging) == 8
 
@@ -104,7 +104,7 @@ class TestEngine(unittest.TestCase):
         filters["severities"] = {"filter": "fatal", "op": "=="}
         filters["generators"] = {"filter": "ingestion_nppf.py", "op": "=="}
         filters["order_by"] = {"field": "notification_time", "descending": False}
-        alerts_planned_imaging = self.query_eboa.get_event_alerts(filters)
+        alerts_planned_imaging = self.query_eboa.get_event_alerts(**filters)
 
         assert len(alerts_planned_imaging) == 8
 
@@ -118,7 +118,7 @@ class TestEngine(unittest.TestCase):
         filters["severities"] = {"filter": "fatal", "op": "=="}
         filters["generators"] = {"filter": "ingestion_nppf.py", "op": "=="}
         filters["order_by"] = {"field": "notification_time", "descending": False}
-        alerts_planned_imaging = self.query_eboa.get_event_alerts(filters)
+        alerts_planned_imaging = self.query_eboa.get_event_alerts(**filters)
 
         assert len(alerts_planned_imaging) == 8
 
@@ -132,7 +132,7 @@ class TestEngine(unittest.TestCase):
         filters["severities"] = {"filter": "fatal", "op": "=="}
         filters["generators"] = {"filter": "ingestion_nppf.py", "op": "=="}
         filters["order_by"] = {"field": "notification_time", "descending": False}
-        alerts_planned_imaging = self.query_eboa.get_event_alerts(filters)
+        alerts_planned_imaging = self.query_eboa.get_event_alerts(**filters)
 
         assert len(alerts_planned_imaging) == 3
 
